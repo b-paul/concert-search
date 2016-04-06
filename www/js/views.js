@@ -8,6 +8,8 @@ var createStyles = function (ctrl) {
 
 angular.module('concert-search')
 
+// TAB TOP-LEVEL VIEWS
+
 .directive('eventsView', function () {
   return {
     templateUrl: '/templates/events-view.html',
@@ -37,6 +39,8 @@ angular.module('concert-search')
     }]
   };
 })
+
+// SUB-VIEWS/COMPONENTS
 
 .directive('venueView', function () {
   return {
@@ -70,4 +74,31 @@ angular.module('concert-search')
       });
     }
   }
+})
+
+.directive('radioGroup', function () {
+  return {
+    template: ''
+      + '<div class="radiogroup">'
+        + '<label ng-repeat="opt in $ctrl.options">'
+          + '{{ opt }}'
+          + '<input type="radio" name="{{ $ctrl.name }}"'
+                 + 'value="{{ opt }}"'
+                 + 'ng-model="$ctrl.model">'
+        + '</label>'
+      + '</div>',
+    scope: {
+      name: '=',
+      options: '=',
+      model: '='
+    },
+    bindToController: true,
+    controllerAs: '$ctrl',
+    controller: function () {
+      var ctrl = this;
+      ctrl.select = function () {
+        ctrl.onChange({i: ctrl.selected});
+      }
+    }
+  };
 });
