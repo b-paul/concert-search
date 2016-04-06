@@ -1,29 +1,19 @@
 angular.module('concert-search')
 
-.factory('maps', function () {
-  var registry = {};
-  var waiters = {};
-  var provideMap = function (cb, map) { setTimeout(cb.bind(null, map), 0); };
+.factory('maps', ['$document', function ($document) {
   var maps = Object.create(google.maps);
-  maps.register = function (id, map) {
-    console.log('registering ' + id);
-    registry[id] = map;
-    if (waiters[id]) {
-      waiters[id].forEach(function (cb) {
-        provideMap(cb, map);
-      });
+  var ps;
+  maps.getPlacesService = function () {
+    if (!ps) {
+      // Element is a dummy to make the service happy. Actual rendering of
+      // attribution data is defined in views.js
+      var attrib = $document[0].createElement('div');
+      ps = new google.maps.places.PlacesService(attrib);
     }
-  };
-  maps.getMap = function (id, cb) {
-    console.log('request for ' + id);
-    if (registry[id]) {
-      provideMap(cb, registry[id]);
-    } else {
-      waiters[id] = (waiters[id] || []).concat(cb);
-    }
+    return ps;
   };
   return maps;
-})
+}])
 
 .factory('eventsList', function () {
   return {
@@ -50,24 +40,22 @@ angular.module('concert-search')
       } }
   ];
 
-  maps.getMap('mainUiMap', function (map) {
-    var places = new google.maps.places.PlacesService(map);
-    venues.forEach(function (v) {
-      var options = {
-        query: v.title,
-        location: new maps.LatLng(v.latLng.lat, v.latLng.lng),
-        radius: 100
-      };
-      places.textSearch(options, function (res, textStatus, status) {
-        if (textStatus !== 'OK') {
-          return console.error(
-            'Unable to find place details for ' + v.title, status
-          );
-        }
-        var match = res[0];
-        v.address = match.formatted_address;
-        v.rating = match.rating;
-      });
+  var places = maps.getPlacesService();
+  venues.forEach(function (v) {
+    var options = {
+      query: v.title,
+      location: new maps.LatLng(v.latLng.lat, v.latLng.lng),
+      radius: 100
+    };
+    places.textSearch(options, function (res, textStatus, status) {
+      var match = res && res[0];
+      if (textStatus !== 'OK' || !match) {
+        return console.error(
+          'Unable to find place details for ' + v.title, status
+        );
+      }
+      v.address = match.formatted_address;
+      v.rating = match.rating;
     });
   });
 

@@ -4,7 +4,7 @@ angular.module('concert-search')
   return {
     restrict: 'E',
     link: function ($scope, $element, $attr) {
-      function initialize() {
+      var initialize = function () {
         var mapOptions = {
           center: new maps.LatLng(43.07493, -89.381388),
           zoom: 15,
@@ -19,10 +19,7 @@ angular.module('concert-search')
           e.preventDefault();
           return false;
         });
-
-        // register the current map to be controlled from elsewhere
-        maps.register('mainUiMap', $scope.map);
-      }
+      };
 
       if (document.readyState === "complete") {
         initialize();
@@ -35,7 +32,6 @@ angular.module('concert-search')
       var provideMap = function (cb) {
         cb($scope.map);
       };
-
 
       this.getMap = function (cb) {
         if ($scope.map) {
