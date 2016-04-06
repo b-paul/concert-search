@@ -46,17 +46,17 @@ angular.module('concert-search')
   return {
     template: ''
       + '<h4>{{ venue.title }}</h4>'
-      + '<venue-address address="venue.address"></venue-address>'
+      + '<two-line-address address="venue.address"></two-line-address>'
       + '<p ng-if="venue.rating">Average rating: {{ venue.rating }}</p>'
       + '<p ng-bind-html="venue.attrib"></p>'
       + '<a href="#" ng-click="$event.preventDefault()">upcoming events</a>',
     scope: {
       venue: '='
     }
-  }
+  };
 })
 
-.directive('venueAddress', function () {
+.directive('twoLineAddress', function () {
   return {
     template: ''
       + '<div class="address-line1">{{ line1 }}</div>'
