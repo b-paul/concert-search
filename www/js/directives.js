@@ -65,10 +65,18 @@ angular.module('concert-search')
       var infoWindow = new maps.InfoWindow();
       var infoScope;
 
+      var firstElement = function ($dom) {
+        for (var i = 0, l = $dom.length; i < l; i++) {
+          if ($dom[i] instanceof HTMLElement) {
+            return $dom[i];
+          }
+        }
+      };
+
       // Access the transcluded element(s) and scope
       $transclude(function (clone, scope) {
         // Set the info window to display the transcluded content when opened
-        infoWindow.setContent(clone[0]);
+        infoWindow.setContent(firstElement(clone));
         // Export the transcluded scope for later augmentation
         infoScope = scope;
       });

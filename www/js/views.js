@@ -1,61 +1,40 @@
+// createStyles may be mixed-into a constructor or factory function to apply the
+// properties used for alternating between map and list display.
+var createStyles = function (ctrl) {
+  ctrl.styles = ['map', 'list'];
+  ctrl.style = 'map';
+  return ctrl;
+};
+
 angular.module('concert-search')
 
-// TODO: extract templates
 .directive('eventsView', function () {
   return {
-    template: ''
-      + '<ion-header-bar>'
-        + '<h1 class="title">{{ $ctrl.title }}</h1>'
-      + '</ion-header-bar>'
-      + '<ion-content scroll="false">'
-        + '<radio-group name="style"'
-                     + 'options="$ctrl.styles"'
-                     + 'model="$ctrl.style">'
-        + '</radio-group>'
-        + '<map ng-if="$ctrl.style == \'map\'" map-data="$ctrl.events">'
-          + '<event-view event="currentData">'
-        + '</map>'
-        + '<ion-list ng-if="$ctrl.style == \'list\'">'
-          + '<ion-item ng-repeat="event in $ctrl.events">'
-            + '<event-view event="event">'
-          + '</ion-item>'
-        + '</ion-list>'
-      + '</ion-content>',
+    templateUrl: '/templates/events-view.html',
     scope: {
       title: '@'
     },
     bindToController: true,
     controllerAs: '$ctrl',
-    controller: EventsView
+    controller: ['eventsList', function (eventsList) {
+      createStyles(this);
+      this.events = eventsList.events;
+    }]
   };
 })
 
 .directive('venuesView', function () {
   return {
-    template: ''
-      + '<ion-header-bar>'
-        + '<h1 class="title">{{ $ctrl.title }}</h1>'
-      + '</ion-header-bar>'
-      + '<ion-content scroll="false">'
-        + '<radio-group name="style"'
-                     + 'options="$ctrl.styles"'
-                     + 'model="$ctrl.style">'
-        + '</radio-group>'
-        + '<map ng-if="$ctrl.style == \'map\'" map-data="$ctrl.venues">'
-          + '<venue-view venue="selectedMapData">'
-        + '</map>'
-        + '<ion-list ng-if="$ctrl.style == \'list\'">'
-          + '<ion-item ng-repeat="venue in $ctrl.venues">'
-            + '<venue-view venue="venue">'
-          + '</ion-item>'
-        + '</ion-list>'
-      + '</ion-content>',
+    templateUrl: '/templates/venues-view.html',
     scope: {
       title: '@'
     },
     bindToController: true,
     controllerAs: '$ctrl',
-    controller: VenuesView
+    controller: ['venuesList', function (venuesList) {
+      createStyles(this);
+      this.venues = venuesList.venues;
+    }]
   };
 })
 
@@ -92,23 +71,3 @@ angular.module('concert-search')
     }
   }
 });
-
-function makeTwoStyleView(ctrl) {
-  ctrl.styles = ['map', 'list'];
-  ctrl.style = 'map';
-  return ctrl;
-};
-
-function EventsView(eventsList) {
-  makeTwoStyleView(this);
-  this.events = eventsList.events;
-};
-
-EventsView.$inject = ['eventsList'];
-
-function VenuesView(venuesList) {
-  makeTwoStyleView(this);
-  this.venues = venuesList.venues;
-};
-
-VenuesView.$inject = ['venuesList'];
