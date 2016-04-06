@@ -1,4 +1,4 @@
-angular.module('concert-search', ['ionic'])
+angular.module('concert-search', ['ionic', 'ngSanitize'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {

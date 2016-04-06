@@ -56,6 +56,7 @@ angular.module('concert-search')
       }
       v.address = match.formatted_address;
       v.rating = match.rating;
+      v.attrib = match.html_attribution;
     });
   });
 

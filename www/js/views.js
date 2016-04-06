@@ -48,6 +48,7 @@ angular.module('concert-search')
       + '<h4>{{ venue.title }}</h4>'
       + '<venue-address address="venue.address"></venue-address>'
       + '<p ng-if="venue.rating">Average rating: {{ venue.rating }}</p>'
+      + '<p ng-bind-html="venue.attrib"></p>'
       + '<a href="#" ng-click="$event.preventDefault()">upcoming events</a>',
     scope: {
       venue: '='
