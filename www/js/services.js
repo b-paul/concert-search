@@ -1,3 +1,11 @@
+var processEvent = function (rawEvent) {
+  rawEvent.latLng = {
+    lat: rawEvent.venue.latitude,
+    lng: rawEvent.venue.longitude
+  };
+  return rawEvent;
+};
+
 angular.module('concert-search')
 
 .factory('maps', ['$document', function ($document) {
@@ -15,11 +23,48 @@ angular.module('concert-search')
   return maps;
 }])
 
-.factory('eventsList', function () {
+.factory('mapPosition', [function () {
+  // Set initial values
   return {
-    events: []
+    lat: 43.07493,
+    lng: -89.381388,
+    radius: 25
   };
-})
+}])  
+
+.factory('eventsList', [
+  'APPID', 'mapPosition', '$http',
+  function (APPID, mapPosition, $http) {
+    var events = [];
+
+    var eventsLoad = $http.jsonp(
+      'http://api.bandsintown.com/events/search.json',
+      { params: {
+          location: mapPosition.lat + ',' + mapPosition.lng,
+          radius: mapPosition.radius,
+          callback: 'JSON_CALLBACK',
+          app_id: APPID
+        } }
+    );
+
+    eventsLoad
+      .then(function (res) {
+        console.log(res);
+        if (res.data.errors) {
+          throw new Error(res.data.errors[0]);
+        }
+        [].push.apply(events, res.data.map(processEvent));
+      })
+      .catch(function (err) {
+        console.error('An error occurred while loading events.');
+        console.error(err);
+      });
+
+    return {
+      events: events
+    };
+  }
+])
 
 .factory('venuesList', ['maps', function (maps) {
   var venues = [

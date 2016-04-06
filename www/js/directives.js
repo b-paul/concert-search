@@ -1,12 +1,12 @@
 angular.module('concert-search')
 
-.directive('map', ['maps', function(maps) {
+.directive('map', ['maps', 'mapPosition', function(maps, mapPosition) {
   return {
     restrict: 'E',
     link: function ($scope, $element, $attr) {
       var initialize = function () {
         var mapOptions = {
-          center: new maps.LatLng(43.07493, -89.381388),
+          center: new maps.LatLng(mapPosition.lat, mapPosition.lng),
           zoom: 15,
           mapTypeId: maps.MapTypeId.ROADMAP,
           mapTypeControl: false,

@@ -56,6 +56,20 @@ angular.module('concert-search')
   };
 })
 
+.directive('eventView', function () {
+  return {
+    template: ''
+      + '<h4>{{ event.artists[0].name }}</h4>'
+      + '<p>{{ event.datetime | date:"EEE, MMM d, yyyy" }}</p>'
+      + '<p>{{ event.datetime | date:"h:mm a" }}</p>'
+      + '<h5>{{ event.venue.name }}</h5>'
+      + '<a target="_blank" ng-href="{{ event.ticket_url }}">Get tickets</a>',
+    scope: {
+      event: '='
+    }
+  };
+})
+
 .directive('twoLineAddress', function () {
   return {
     template: ''
