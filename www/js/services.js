@@ -67,11 +67,44 @@ angular.module('concert-search')
 
 .filter('eventArtistNames', function () {
   return function (event) {
-    return event.artists
+    return !event ? '' : event.artists
       .map(function (artist) { return artist.name; })
       .join('/');
   };
-})
+})  
+
+.factory('eventsList', [
+  'APPID', 'mapPosition', '$http',
+  function (APPID, mapPosition, $http) {
+    var events = [];
+
+    var eventsLoad = $http.jsonp(
+      'http://api.bandsintown.com/events/search.json',
+      { params: {
+          location: mapPosition.lat + ',' + mapPosition.lng,
+          radius: mapPosition.radius,
+          callback: 'JSON_CALLBACK',
+          app_id: APPID
+        } }
+    );
+
+    eventsLoad
+      .then(function (res) {
+        if (res.data.errors) {
+          throw new Error(res.data.errors[0]);
+        }
+        [].push.apply(events, res.data.map(processEvent));
+      })
+      .catch(function (err) {
+        console.error('An error occurred while loading events list.');
+        console.error(err);
+      });
+
+    return {
+      events: events
+    };
+  }
+])
 
 .factory('venuesList', ['maps', function (maps) {
   var venues = [
