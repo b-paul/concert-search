@@ -66,6 +66,14 @@ angular.module('concert-search')
   }
 ])
 
+.filter('eventArtistNames', function () {
+  return function (event) {
+    return event.artists
+      .map(function (artist) { return artist.name; })
+      .join('/');
+  };
+})
+
 .factory('venuesList', ['maps', function (maps) {
   var venues = [
     { title: 'Ivory Room',
@@ -108,4 +116,56 @@ angular.module('concert-search')
   return {
     venues: venues
   };
-}]);
+}])
+
+.factory('artistsList', [
+  'APPID', '$http',
+  function (APPID, $http) {
+    var artists = [];
+
+    var artistsLoaded = $http.get(
+      'https://musicbrainz.org/ws/2/artist/',
+      { params: {
+          query: 'artist:/./',
+          fmt: 'json'
+        } }
+    );
+
+    artistsLoaded
+      .then(function (res) {
+        [].push.apply(artists, res.data.artists);
+      })
+      .catch(function (err) {
+        console.error('An error occurred while loading artists list.')
+        console.error(err);
+      });
+
+    return {
+      artists: artists
+    };
+  }
+])
+
+.factory('favoriteArtists', function () {
+  var favorites = {};
+  return {
+    length: 0,
+    contains: function (id) {
+      return (id in favorites);
+    },
+    add: function (id) {
+      if (this.contains(id)) {
+        return;
+      }
+      this.length++;
+      favorites[id] = true;
+    },
+    remove: function (id) {
+      this.length--;
+      delete favorites[id];
+    },
+    toggle: function (id) {
+      return this.contains(id) ? this.remove(id) : this.add(id)
+    }
+  };
+});

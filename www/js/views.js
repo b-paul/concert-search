@@ -40,6 +40,23 @@ angular.module('concert-search')
   };
 })
 
+.directive('artistsView', function () {
+  return {
+    templateUrl: '/templates/artists-view.html',
+    scope: {
+      title: '@'
+    },
+    bindToController: true,
+    controllerAs: '$ctrl',
+    controller: [
+      'artistsList', 'favoriteArtists',
+      function (artistsList) {
+        this.artists = artistsList.artists;
+      }
+    ]
+  };
+})
+
 // SUB-VIEWS/COMPONENTS
 
 .directive('venueView', function () {
@@ -59,7 +76,7 @@ angular.module('concert-search')
 .directive('eventView', function () {
   return {
     template: ''
-      + '<h4>{{ event.artists[0].name }}</h4>'
+      + '<h4>{{ event | eventArtistNames }}</h4>'
       + '<p>{{ event.datetime | date:"EEE, MMM d, yyyy" }}</p>'
       + '<p>{{ event.datetime | date:"h:mm a" }}</p>'
       + '<h5>{{ event.venue.name }}</h5>'
@@ -68,6 +85,32 @@ angular.module('concert-search')
       event: '='
     }
   };
+})
+
+.directive('artistView', function () {
+  return {
+    template: ''
+      + '<h4 ng-click="$ctrl.toggleFavorite($ctrl.artist)">'
+        + '{{ $ctrl.artist.name }}'
+        + '<img ng-src="{{'
+          + "'/img/svg/star-' + $ctrl.starType($ctrl.artist) + '.svg'"
+        + '}}">'
+      + '</h4>',
+    scope: {
+      artist: '='
+    },
+    controllerAs: '$ctrl',
+    bindToController: true,
+    controller: ['favoriteArtists', function (favoriteArtists) {
+      this.starType = function (artist) {
+        return favoriteArtists.contains(artist.id) ? 'full' : 'empty';
+      };
+
+      this.toggleFavorite = function (artist) {
+        favoriteArtists.toggle(artist.id);
+      };
+    }]
+  }
 })
 
 .directive('twoLineAddress', function () {
