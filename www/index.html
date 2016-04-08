@@ -25,6 +25,7 @@
     <script src="js/app.js"></script>
     <script src="js/services.js"></script>
     <script src="js/directives.js"></script>
+    <script src="js/controllers.js"></script>
     <script src="js/views.js"></script>
   </head>
 
@@ -36,7 +37,7 @@
       <ion-tab title="Venues">
         <venues-view title="Venues">
       </ion-tab>
-      <ion-tab title="Artists">
+      <ion-tab title="Artists" ng-controller="favoritesCounter" badge="favCount">
         <artists-view title="Artists">
       </ion-tab>
     </ion-tabs>

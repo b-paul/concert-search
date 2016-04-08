@@ -138,25 +138,17 @@ angular.module('concert-search')
   return {
     template: ''
       + '<div class="radiogroup">'
-        + '<label ng-repeat="opt in $ctrl.options">'
+        + '<label ng-repeat="opt in options">'
           + '{{ opt }}'
-          + '<input type="radio" name="{{ $ctrl.name }}"'
+          + '<input type="radio" name="{{ name }}"'
                  + 'value="{{ opt }}"'
-                 + 'ng-model="$ctrl.model">'
+                 + 'ng-model="model">'
         + '</label>'
       + '</div>',
     scope: {
       name: '=',
       options: '=',
       model: '='
-    },
-    bindToController: true,
-    controllerAs: '$ctrl',
-    controller: function () {
-      var ctrl = this;
-      ctrl.select = function () {
-        ctrl.onChange({i: ctrl.selected});
-      }
     }
   };
 });

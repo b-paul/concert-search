@@ -37,8 +37,8 @@ angular.module('concert-search')
   function (APPID, mapPosition, $http) {
     var events = [];
 
-    var eventsLoad = $http.jsonp(
-      'http://api.bandsintown.com/events/search.json',
+    var eventsLoaded = $http.jsonp(
+      '//api.bandsintown.com/events/search.json',
       { params: {
           location: mapPosition.lat + ',' + mapPosition.lng,
           radius: mapPosition.radius,
@@ -47,16 +47,15 @@ angular.module('concert-search')
         } }
     );
 
-    eventsLoad
+    eventsLoaded
       .then(function (res) {
-        console.log(res);
         if (res.data.errors) {
           throw new Error(res.data.errors[0]);
         }
         [].push.apply(events, res.data.map(processEvent));
       })
       .catch(function (err) {
-        console.error('An error occurred while loading events.');
+        console.error('An error occurred while loading events list.');
         console.error(err);
       });
 

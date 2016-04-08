@@ -3,7 +3,28 @@ angular.module('concert-search')
 .directive('map', ['maps', 'mapPosition', function(maps, mapPosition) {
   return {
     restrict: 'E',
-    link: function ($scope, $element, $attr) {
+    controller: function () {
+      var map;
+      var waitingForMap = [];
+      var ctrl = this;
+
+      ctrl.getMap = function (cb) {
+        if (map) {
+          cb(map);
+        } else {
+          waitingForMap.push(cb);
+        }
+      };
+
+      ctrl.setMap = function(_map_) {
+        map = _map_;
+        waitingForMap.forEach(function (cb) {
+          ctrl.getMap(cb);
+        });
+        waitingForMap = [];
+      };
+    },
+    link: function ($scope, $element, $attr, $ctrl) {
       var initialize = function () {
         var mapOptions = {
           center: new maps.LatLng(mapPosition.lat, mapPosition.lng),
@@ -12,13 +33,8 @@ angular.module('concert-search')
           mapTypeControl: false,
           streetViewControl: false
         };
-        $scope.map = new maps.Map($element[0], mapOptions);
-  
-        // Stop the side bar from dragging when mousedown/tapdown on the map
-        maps.event.addDomListener($element[0], 'mousedown', function (e) {
-          e.preventDefault();
-          return false;
-        });
+        var map = new maps.Map($element[0], mapOptions);
+        $ctrl.setMap(map);
       };
 
       if (document.readyState === "complete") {
@@ -26,26 +42,7 @@ angular.module('concert-search')
       } else {
         maps.event.addDomListener(window, 'load', initialize);
       }
-    },
-    controller: ['$scope', function ($scope) {
-      var waitingForMap = [];
-      var provideMap = function (cb) {
-        cb($scope.map);
-      };
-
-      this.getMap = function (cb) {
-        if ($scope.map) {
-          provideMap(cb);
-        } else {
-          waitingForMap.push(cb);
-        }
-      };
-
-      var unWatch = $scope.$watch('map', function () {
-        unWatch();
-        waitingForMap.forEach(provideMap);
-      });
-    }]
+    }
   }
 }])
 
