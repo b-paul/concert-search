@@ -2,7 +2,7 @@ angular.module('concert-search')
 
 .factory('maps', ['$document', function ($document) {
   var maps = Object.create(google.maps);
-  var ps;
+  var ps, gc;
   maps.getPlacesService = function () {
     if (!ps) {
       // Element is a dummy to make the service happy. Actual rendering of
@@ -11,6 +11,12 @@ angular.module('concert-search')
       ps = new google.maps.places.PlacesService(attrib);
     }
     return ps;
+  };
+  maps.getGeocoder = function () {
+    if (!gc) {
+      gc = new google.maps.Geocoder();
+    }
+    return gc;
   };
   return maps;
 }])
@@ -106,6 +112,7 @@ angular.module('concert-search')
     };
 
     var places = maps.getPlacesService();
+    var geo = maps.getGeocoder();
 
     $rootScope.$watchCollection(
       function () { return eventsList.events; },
@@ -124,26 +131,37 @@ angular.module('concert-search')
       };
 
       var loadProcess = $q.defer();
+      // Try first with places service using both name and latitude/longitude
       places.textSearch(options, function (res, textStatus, status) {
         var match = res && res[0];
         if (textStatus !== 'OK' || !match) {
-          var err = new Error(
-            'Unable to find place details for ' + venue.name
-          );
-          err.response = response;
-          err.textStatus = textStatus;
-          err.status = status;
-          loadProcess.reject(err);
+          // Retry on failure with geocoder based on lat/lng only. Expecting
+          //   this to be less exact, intuitively, but have not tested.
+          geo.geocode(
+            { location: { lat: venue.latLng.lat, lng: venue.latLng.lng } },
+            function (res, status) {
+              match = res && res[0];
+              if (status !== maps.GeocoderStatus.OK || !match) {
+                var err = new Error(
+                  'Unable to find place details for ' + venue.name
+                );
+                err.response = response;
+                err.textStatus = textStatus;
+                err.status = status;
+                return loadProcess.reject(err);
+              }
+              loadProcess.resolve(match);
+            }
+          )
         }
-        $rootScope.$apply(function () {
-          venue.address = match.formatted_address;
-          venue.rating = match.rating;
-          venue.attrib = match.html_attribution;
-          loadProcess.resolve(match);
-        });
+        loadProcess.resolve(match);
       });
 
-      return loadProcess.promise;
+      return loadProcess.promise.then(function (match) {
+        venue.address = match.formatted_address;
+        venue.rating = match.rating;
+        venue.attrib = match.html_attribution;
+      });
     };
 
     return vl;
