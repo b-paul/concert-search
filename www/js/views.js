@@ -62,14 +62,25 @@ angular.module('concert-search')
 .directive('venueView', function () {
   return {
     template: ''
-      + '<h4>{{ venue.title }}</h4>'
+      + '<h4>{{ venue.name }}</h4>'
       + '<two-line-address address="venue.address"></two-line-address>'
       + '<p ng-if="venue.rating">Average rating: {{ venue.rating }}</p>'
       + '<p ng-bind-html="venue.attrib"></p>'
       + '<a href="#" ng-click="$event.preventDefault()">upcoming events</a>',
     scope: {
       venue: '='
-    }
+    },
+    controllerAs: '$ctrl',
+    controller: ['$scope', 'venuesList', function ($scope, venuesList) {
+      var lastVenueId;
+      $scope.$watch('venue', function () {
+        if ($scope.venue && $scope.venue.id !== lastVenueId) {
+          lastVenueId = $scope.venue.id;
+          $scope.venue.address = 'loading address...';
+          venuesList.fetchAddress($scope.venue);
+        }
+      });
+    }]
   };
 })
 
@@ -123,10 +134,14 @@ angular.module('concert-search')
     },
     link: function ($scope, $element, $attr) {
       $scope.$watch('address', function () {
-        if (!$scope.address) { return; }
+        if (!$scope.address) {
+          $scope.line1 = null;
+          $scope.line2 = null;
+          return;
+        }
         var parts = $scope.address.split(', ');
         // discard the last part (country name)
-        parts.pop()
+        parts = parts.slice(0, 3);
         $scope.line1 = parts[0]
         $scope.line2 = parts.slice(1).join(', ');
       });
