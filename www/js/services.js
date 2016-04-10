@@ -105,8 +105,8 @@ angular.module('concert-search')
 ])
 
 .factory('venuesList', [
-  'maps', 'eventsList', '$rootScope', '$q',
-  function (maps, eventsList, $rootScope, $q) {
+  'maps', 'eventsList', 'ThrottledResource', '$rootScope', '$q',
+  function (maps, eventsList, ThrottledResource, $rootScope, $q) {
     var vl = {
       venues: []
     };
@@ -123,6 +123,7 @@ angular.module('concert-search')
       }
     );
 
+    var fetcher = new ThrottledResource();
     vl.fetchAddress = function (venue) {
       var options = {
         query: venue.name,
@@ -130,37 +131,39 @@ angular.module('concert-search')
         radius: 100
       };
 
-      var loadProcess = $q.defer();
-      // Try first with places service using both name and latitude/longitude
-      places.textSearch(options, function (res, textStatus, status) {
-        var match = res && res[0];
-        if (textStatus !== 'OK' || !match) {
-          // Retry on failure with geocoder based on lat/lng only. Expecting
-          //   this to be less exact, intuitively, but have not tested.
-          geo.geocode(
-            { location: { lat: venue.latLng.lat, lng: venue.latLng.lng } },
-            function (res, status) {
-              match = res && res[0];
-              if (status !== maps.GeocoderStatus.OK || !match) {
-                var err = new Error(
-                  'Unable to find place details for ' + venue.name
-                );
-                err.response = response;
-                err.textStatus = textStatus;
-                err.status = status;
-                return loadProcess.reject(err);
+      return fetcher.addTask(function () {
+        var loadProcess = $q.defer();
+        // Try first with places service using both name and latitude/longitude
+        places.textSearch(options, function (res, textStatus, status) {
+          var match = res && res[0];
+          if (textStatus !== 'OK' || !match) {
+            // Retry on failure with geocoder based on lat/lng only. Expecting
+            //   this to be less exact, intuitively, but have not tested.
+            geo.geocode(
+              { location: { lat: venue.latLng.lat, lng: venue.latLng.lng } },
+              function (res, status) {
+                match = res && res[0];
+                if (status !== maps.GeocoderStatus.OK || !match) {
+                  var err = new Error(
+                    'Unable to find place details for ' + venue.name
+                  );
+                  err.response = res;
+                  err.textStatus = textStatus;
+                  err.status = status;
+                  return loadProcess.reject(err);
+                }
+                loadProcess.resolve(match);
               }
-              loadProcess.resolve(match);
-            }
-          )
-        }
-        loadProcess.resolve(match);
-      });
+            )
+          }
+          loadProcess.resolve(match);
+        });
 
-      return loadProcess.promise.then(function (match) {
-        venue.address = match.formatted_address;
-        venue.rating = match.rating;
-        venue.attrib = match.html_attribution;
+        return loadProcess.promise.then(function (match) {
+          venue.address = match.formatted_address;
+          venue.rating = match.rating;
+          venue.attrib = match.html_attribution;
+        });
       });
     };
 
@@ -218,7 +221,48 @@ angular.module('concert-search')
       return this.contains(id) ? this.remove(id) : this.add(id)
     }
   };
-});
+})
+
+.factory('ThrottledResource', ['$q', '$timeout', function ($q, $timeout) {
+  return function ThrottledResource() {
+    var self = this;
+
+    self.taskRate = 500; // Start at most 1 task per 500ms
+    var taskTimer;
+
+    self.taskBandwidth = 5; // Up to 5 tasks in parallel
+    var tasksOut = 0;
+    var pendingTasks = [];
+
+    self.addTask = function (task) {
+      if (taskTimer) {
+        return taskTimer.then(function () {
+          self.addTask(task);
+        });
+      } else if (tasksOut >= self.taskBandwidth) {
+        var deferredTask = $q.defer();
+        pendingTasks.push(function () {
+          var innerResult = task();
+          deferredTask.resolve(innerResult);
+          return innerResult;
+        });
+        return deferredTask.promise;
+      } else {
+        var result = task();
+        result.finally(function () {
+          tasksOut--;
+          var next = pendingTasks.shift();
+          next && self.addTask(next);
+        });
+        tasksOut++;
+        taskTimer = $timeout(function () {
+          taskTimer = null;
+        }, self.taskRate);
+        return result;
+      }
+    };
+  };
+}]);
 
 var processEvent = function (rawEvent) {
   rawEvent.latLng = {
