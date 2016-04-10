@@ -137,18 +137,23 @@ angular.module('concert-search')
 .directive('radioGroup', function () {
   return {
     template: ''
-      + '<div class="radiogroup">'
-        + '<label ng-repeat="opt in options">'
+      + '<div class="radiogroup"><form>'
+        + '<label ng-repeat="opt in $ctrl.options">'
           + '{{ opt }}'
-          + '<input type="radio" name="{{ name }}"'
+          + '<input type="radio" name="{{ $ctrl.name }}"'
                  + 'value="{{ opt }}"'
-                 + 'ng-model="model">'
+                 + 'ng-model="$ctrl.model">'
         + '</label>'
-      + '</div>',
+      + '</form></div>',
     scope: {
-      name: '=',
+      name: '@',
       options: '=',
       model: '='
-    }
+    },
+    // controller included solely so that ng-model binds correctly to the
+    // outside scope.
+    bindToController: true,
+    controllerAs: '$ctrl',
+    controller: function () {}
   };
 });
