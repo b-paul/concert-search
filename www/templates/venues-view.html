@@ -8,7 +8,7 @@
   </radio-group>
   <map ng-if="$ctrl.style == 'map'" map-data="$ctrl.venues">
     <!-- scope for venue-view controlled by map-data directive -->
-    <venue-view venue="selectedMapData">
+    <venue-view dynamic venue="selectedMapData">
   </map>
   <ion-list ng-if="$ctrl.style == 'list'">
     <ion-item ng-repeat="venue in $ctrl.venues">

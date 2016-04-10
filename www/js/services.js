@@ -99,8 +99,8 @@ angular.module('concert-search')
 ])
 
 .factory('venuesList', [
-  'maps', 'eventsList', '$rootScope',
-  function (maps, eventsList, $rootScope) {
+  'maps', 'eventsList', '$rootScope', '$q',
+  function (maps, eventsList, $rootScope, $q) {
     var vl = {
       venues: []
     };
@@ -122,20 +122,28 @@ angular.module('concert-search')
         location: new maps.LatLng(venue.latLng.lat, venue.latLng.lng),
         radius: 100
       };
+
+      var loadProcess = $q.defer();
       places.textSearch(options, function (res, textStatus, status) {
         var match = res && res[0];
         if (textStatus !== 'OK' || !match) {
-          return console.error(
-            'Unable to find place details for ' + venue.name,
-            textStatus, status
+          var err = new Error(
+            'Unable to find place details for ' + venue.name
           );
+          err.response = response;
+          err.textStatus = textStatus;
+          err.status = status;
+          loadProcess.reject(err);
         }
         $rootScope.$apply(function () {
           venue.address = match.formatted_address;
           venue.rating = match.rating;
           venue.attrib = match.html_attribution;
+          loadProcess.resolve(match);
         });
       });
+
+      return loadProcess.promise;
     };
 
     return vl;

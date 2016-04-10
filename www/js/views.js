@@ -59,7 +59,7 @@ angular.module('concert-search')
 
 // SUB-VIEWS/COMPONENTS
 
-.directive('venueView', function () {
+.directive('venueView', ['venuesList', function (venuesList) {
   return {
     template: ''
       + '<h4>{{ venue.name }}</h4>'
@@ -70,19 +70,23 @@ angular.module('concert-search')
     scope: {
       venue: '='
     },
-    controllerAs: '$ctrl',
-    controller: ['$scope', 'venuesList', function ($scope, venuesList) {
+    link: function ($scope, $element, $attr) {
       var lastVenueId;
-      $scope.$watch('venue', function () {
+      var unwatch = $scope.$watch('venue', function () {
         if ($scope.venue && $scope.venue.id !== lastVenueId) {
           lastVenueId = $scope.venue.id;
           $scope.venue.address = 'loading address...';
-          venuesList.fetchAddress($scope.venue);
+          venuesList.fetchAddress($scope.venue).catch(function (err) {
+            $scope.venue.address = 'Unable to load address';
+          });
+          if (!('dynamic' in $attr)) {
+            unwatch();
+          }
         }
       });
-    }]
+    }
   };
-})
+}])
 
 .directive('eventView', function () {
   return {
