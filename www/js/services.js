@@ -1,11 +1,3 @@
-var processEvent = function (rawEvent) {
-  rawEvent.latLng = {
-    lat: rawEvent.venue.latitude,
-    lng: rawEvent.venue.longitude
-  };
-  return rawEvent;
-};
-
 angular.module('concert-search')
 
 .factory('maps', ['$document', function ($document) {
@@ -106,49 +98,49 @@ angular.module('concert-search')
   }
 ])
 
-.factory('venuesList', ['maps', function (maps) {
-  var venues = [
-    { title: 'Ivory Room',
-      latLng: {
-        lat: 43.0743976,
-        lng: -89.38719079999998
-      } },
-    { title: 'The Frequency',
-      latLng: {
-        lat: 43.07237920000001,
-        lng: -89.38478880000002
-      } },
-    { title: 'Majestic Theatre',
-      latLng: {
-        lat: 43.0744173,
-        lng: -89.38093500000002
-      } }
-  ];
-
-  var places = maps.getPlacesService();
-  venues.forEach(function (v) {
-    var options = {
-      query: v.title,
-      location: new maps.LatLng(v.latLng.lat, v.latLng.lng),
-      radius: 100
+.factory('venuesList', [
+  'maps', 'eventsList', '$rootScope',
+  function (maps, eventsList, $rootScope) {
+    var vl = {
+      venues: []
     };
-    places.textSearch(options, function (res, textStatus, status) {
-      var match = res && res[0];
-      if (textStatus !== 'OK' || !match) {
-        return console.error(
-          'Unable to find place details for ' + v.title, status
-        );
-      }
-      v.address = match.formatted_address;
-      v.rating = match.rating;
-      v.attrib = match.html_attribution;
-    });
-  });
 
-  return {
-    venues: venues
-  };
-}])
+    var places = maps.getPlacesService();
+
+    $rootScope.$watchCollection(
+      function () { return eventsList.events; },
+      function () {
+        vl.venues = eventsList.events.map(function (event) {
+          return processVenue(event.venue);
+        });
+      }
+    );
+
+    vl.fetchAddress = function (venue) {
+      var options = {
+        query: venue.name,
+        location: new maps.LatLng(venue.latLng.lat, venue.latLng.lng),
+        radius: 100
+      };
+      places.textSearch(options, function (res, textStatus, status) {
+        var match = res && res[0];
+        if (textStatus !== 'OK' || !match) {
+          return console.error(
+            'Unable to find place details for ' + venue.name,
+            textStatus, status
+          );
+        }
+        $rootScope.$apply(function () {
+          venue.address = match.formatted_address;
+          venue.rating = match.rating;
+          venue.attrib = match.html_attribution;
+        });
+      });
+    };
+
+    return vl;
+  }
+])
 
 .factory('artistsList', [
   'APPID', '$http',
@@ -201,3 +193,19 @@ angular.module('concert-search')
     }
   };
 });
+
+var processEvent = function (rawEvent) {
+  rawEvent.latLng = {
+    lat: rawEvent.venue.latitude,
+    lng: rawEvent.venue.longitude
+  };
+  return rawEvent;
+};
+
+var processVenue = function (rawVenue) {
+  rawVenue.latLng = {
+    lat: rawVenue.latitude,
+    lng: rawVenue.longitude
+  };
+  return rawVenue;
+};

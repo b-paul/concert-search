@@ -46,7 +46,7 @@ angular.module('concert-search')
   }
 }])
 
-.directive('mapData', ['maps', function (maps) {
+.directive('mapData', ['maps', 'venuesList', function (maps, venuesList) {
   return {
     restrict: 'A',
     scope: {
