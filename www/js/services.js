@@ -28,7 +28,7 @@ angular.module('concert-search')
     lng: -89.381388,
     radius: 25
   };
-}])  
+}])
 
 .factory('eventsList', [
   'APPID', 'mapPosition', '$http',
@@ -139,7 +139,7 @@ angular.module('concert-search')
           if (textStatus !== 'OK' || !match) {
             // Retry on failure with geocoder based on lat/lng only. Expecting
             //   this to be less exact, intuitively, but have not tested.
-            geo.geocode(
+            return geo.geocode(
               { location: { lat: venue.latLng.lat, lng: venue.latLng.lng } },
               function (res, status) {
                 match = res && res[0];
