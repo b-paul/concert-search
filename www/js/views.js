@@ -86,6 +86,7 @@ angular.module('concert-search')
       var unwatch = $scope.$watch('venue', function () {
         if ($scope.venue && $scope.venue.id !== lastVenueId) {
           lastVenueId = $scope.venue.id;
+          $scope.venue = venuesList.getCanonicalVenue($scope.venue);
           if (('dynamic' in $attr) || !$scope.venue.address) {
             $scope.venue.address = 'loading address...';
             venuesList.fetchAddress($scope.venue).catch(function (err) {

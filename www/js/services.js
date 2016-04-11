@@ -176,6 +176,7 @@ angular.module('concert-search')
 .factory('venuesList', [
   'maps', 'eventsList', 'ThrottledResource', '$rootScope', '$q',
   function (maps, eventsList, ThrottledResource, $rootScope, $q) {
+    var venuesById = {};
     var vl = {
       venues: []
     };
@@ -186,13 +187,25 @@ angular.module('concert-search')
     $rootScope.$watchCollection(
       function () { return eventsList.events; },
       function () {
-        vl.venues = eventsList.events.map(function (event) {
-          return processVenue(event.venue);
-        });
+        vl.venues = eventsList.events.reduce(function (acc, event) {
+          var venue = vl.getCanonicalVenue(event.venue);
+          if (acc.indexOf(venue) + 1) {
+            return acc;
+          }
+          return acc.concat(venue);
+        }, []);
       }
     );
 
     var fetcher = new ThrottledResource();
+    vl.getCanonicalVenue = function (venue) {
+      var canonical = venuesById[venue.id];
+      if (!canonical) {
+        canonical = processVenue(venue);
+        venuesById[canonical.id] = canonical;
+      }
+      return canonical;
+    };
     vl.fetchAddress = function (venue) {
       var options = {
         query: venue.name,
@@ -229,9 +242,12 @@ angular.module('concert-search')
         });
 
         return loadProcess.promise.then(function (match) {
+          console.log(match);
           venue.address = match.formatted_address;
           venue.rating = match.rating;
           venue.attrib = match.html_attribution;
+          venue.latLng.lat = match.geometry.location.lat();
+          venue.latLng.lng = match.geometry.location.lng();
           return venue;
         });
       });
