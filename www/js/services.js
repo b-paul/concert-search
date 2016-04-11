@@ -232,6 +232,7 @@ angular.module('concert-search')
           venue.address = match.formatted_address;
           venue.rating = match.rating;
           venue.attrib = match.html_attribution;
+          return venue;
         });
       });
     };
