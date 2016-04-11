@@ -33,10 +33,19 @@ angular.module('concert-search')
     },
     bindToController: true,
     controllerAs: '$ctrl',
-    controller: ['venuesList', function (venuesList) {
+    controller: [
+      '$scope', 'venuesList', 'mapPosition', 'mapSelection',
+      function ($scope, venuesList, mapPosition, mapSelection) {
       createStyles(this);
-      this.venues = venuesList.venues;
-    }]
+        this.venues = venuesList.venues;
+        this.jumpToMap = function (venue) {
+          this.style = 'map';
+          mapPosition.lat = venue.latLng.lat;
+          mapPosition.lng = venue.latLng.lng;
+          mapSelection.setSelection(venue);
+        }
+      }
+    ]
   };
 })
 
@@ -63,12 +72,14 @@ angular.module('concert-search')
   return {
     template: ''
       + '<h4>{{ venue.name }}</h4>'
-      + '<two-line-address address="venue.address"></two-line-address>'
+      + '<two-line-address address="venue.address" on-inspect="onInspect()">'
+      + '</two-line-address>'
       + '<p ng-if="venue.rating">Average rating: {{ venue.rating }}</p>'
       + '<p ng-bind-html="venue.attrib"></p>'
       + '<a href="#" ng-click="$event.preventDefault()">upcoming events</a>',
     scope: {
-      venue: '='
+      venue: '=',
+      onInspect: '&'
     },
     link: function ($scope, $element, $attr) {
       var lastVenueId;
@@ -131,12 +142,20 @@ angular.module('concert-search')
 .directive('twoLineAddress', function () {
   return {
     template: ''
-      + '<div class="address-line1">{{ line1 }}</div>'
-      + '<div class="address-line2">{{ line2 }}</div>',
+      + '<a href="#" ng-click="inspect(address, $event)">'
+        + '<div class="address-line1">{{ line1 }}</div>'
+        + '<div class="address-line2">{{ line2 }}</div>'
+      + '</a>',
     scope: {
-      address: '='
+      address: '=',
+      onInspect: '&'
     },
     link: function ($scope, $element, $attr) {
+      $scope.inspect = function (address, $event) {
+        $event && $event.preventDefault();
+        $scope.onInspect();
+      };
+
       $scope.$watch('address', function () {
         if (!$scope.address) {
           $scope.line1 = null;

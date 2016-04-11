@@ -65,9 +65,11 @@ angular.module('concert-search')
 
 .filter('eventArtistNames', function () {
   return function (event) {
-    return !event ? '' : event.artists
-      .map(function (artist) { return artist.name; })
-      .join('/');
+    return !event
+      ? ''
+      : event.artists
+          .map(function (artist) { return artist.name; })
+          .join('/');
   };
 })  
 
