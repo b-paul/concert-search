@@ -30,6 +30,73 @@ angular.module('concert-search')
   };
 }])
 
+.factory('mapSelection', ['maps', function (maps) {
+  var map, selection, iwContent;
+  var infoWindow = new maps.InfoWindow();
+  var markersPending = [];
+  var markers = {};
+  var listeners = [];
+
+  var key = function (data) {
+    return JSON.stringify(data);
+  };
+
+  return {
+    setInfoWindowContent: function (elt) {
+      iwContent = elt;
+      infoWindow.setContent(elt);
+    },
+    getInfoWindowContent: function () {
+      return iwContent;
+    },
+    setMap: function (m) {
+      map = m;
+      markers = {};
+      var self = this;
+      markersPending.forEach(function (bundle) {
+        var mrk = bundle[0], data = bundle[1];
+        self.addMarker(mrk, data);
+      });
+      markersPending = [];
+    },
+    addMarker: function (mrk, data) {
+      if (!map) {
+        markersPending.push([mrk, data]);
+      } else {
+        mrk.setMap(map);
+        var dataKey = key(data);
+        markers[dataKey] = mrk;
+        if (data === selection) {
+          this.setSelection(data);
+        }
+      }
+    },
+    removeMarker: function (mrk) {
+      mrk.setMap(null);
+      Object.keys(markers).forEach(function (k) {
+        if (markers[k] === mrk) { delete markers[k]; }
+      });
+    },
+    setSelection: function (data) {
+      selection = data;
+      var dataKey = key(data);
+      var mrk = markers[dataKey];
+      if (mrk && map && infoWindow) {
+        infoWindow.open(map, mrk);
+      }
+      listeners.forEach(function (l) {
+        l(data);
+      });
+    },
+    onSelect: function (listener) {
+      listeners.push(listener);
+    },
+    offSelect: function (listener) {
+      listeners = listeners.filter(function (l) { return l !== listener; });
+    }
+  }
+}])
+
 .factory('eventsList', [
   'APPID', 'mapPosition', '$http',
   function (APPID, mapPosition, $http) {
