@@ -38,7 +38,7 @@ angular.module('concert-search')
   var listeners = [];
 
   var key = function (data) {
-    return JSON.stringify(data);
+    return data.id;
   };
 
   return {
@@ -242,7 +242,6 @@ angular.module('concert-search')
         });
 
         return loadProcess.promise.then(function (match) {
-          console.log(match);
           venue.address = match.formatted_address;
           venue.rating = match.rating;
           venue.attrib = match.html_attribution;
@@ -257,9 +256,7 @@ angular.module('concert-search')
   }
 ])
 
-.factory('artistsList', [
-  'APPID', '$http',
-  function (APPID, $http) {
+.factory('artistsList', ['$http', function ($http) {
     var artists = [];
 
     var artistsLoaded = $http.get(
