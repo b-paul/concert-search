@@ -8,3 +8,13 @@ map {
 .scroll {
   height: 100%;
 }
+
+.radiogroup {
+  position: fixed;
+  background-color: white;
+  padding: 1rem;
+  top: 4rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+}
