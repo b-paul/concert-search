@@ -76,7 +76,9 @@ angular.module('concert-search')
       + '</two-line-address>'
       + '<p ng-if="venue.rating">Average rating: {{ venue.rating }}</p>'
       + '<p ng-bind-html="venue.attrib"></p>'
-      + '<a href="#" ng-click="$event.preventDefault()">upcoming events</a>',
+      + '<a href="#" ng-click="$event.preventDefault()">'
+        + '{{ venue.events.length }} upcoming events'
+      + '</a>',
     scope: {
       venue: '=',
       onInspect: '&'
@@ -92,6 +94,9 @@ angular.module('concert-search')
             venuesList.fetchAddress($scope.venue).catch(function (err) {
               $scope.venue.address = 'Unable to load address';
             });
+          }
+          if (('dynamic' in $attr) || !$scope.venue.address) {
+            venuesList.fetchEvents($scope.venue);
           }
           if (!('dynamic' in $attr)) {
             unwatch();

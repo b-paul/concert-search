@@ -178,8 +178,9 @@ angular.module('concert-search')
 ])
 
 .factory('venuesList', [
-  'maps', 'eventsList', 'ThrottledResource', '$rootScope', '$q',
-  function (maps, eventsList, ThrottledResource, $rootScope, $q) {
+  'APPID', 'maps', 'eventsList', 'ThrottledResource',
+  '$rootScope', '$q', '$http',
+  function (APPID, maps, eventsList, ThrottledResource, $rootScope, $q, $http) {
     var venuesById = {};
     var vl = {
       venues: []
@@ -209,6 +210,19 @@ angular.module('concert-search')
         venuesById[canonical.id] = canonical;
       }
       return canonical;
+    };
+    vl.fetchEvents = function (venue) {
+      var eventsLoaded = $http.jsonp(
+        '//api.bandsintown.com/venues/' + venue.id + '/events.json',
+        { params: {
+            callback: 'JSON_CALLBACK',
+            app_id: APPID
+          } }
+      );
+
+      return eventsLoaded.then(function (res) {
+        venue.events = res.data;
+      });
     };
     vl.fetchAddress = function (venue) {
       var options = {
