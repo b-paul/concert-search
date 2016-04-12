@@ -31,13 +31,14 @@
 
   <body ng-app="concert-search">
     <ion-tabs>
-      <ion-tab title="Events">
+      <ion-tab title="Events" on-select="$broadcast('selecttab', 'events')">
         <events-view title="Events">
       </ion-tab>
-      <ion-tab title="Venues">
+      <ion-tab title="Venues" on-select="$broadcast('selecttab', 'venues')">
         <venues-view title="Venues">
       </ion-tab>
-      <ion-tab title="Artists" ng-controller="favoritesCounter" badge="favCount">
+      <ion-tab title="Artists" on-select="$broadcast('selecttab', 'artists')"
+               ng-controller="favoritesCounter" badge="favCount">
         <artists-view title="Artists">
       </ion-tab>
     </ion-tabs>
