@@ -31,8 +31,7 @@ angular.module('concert-search')
 }])
 
 .factory('mapSelection', ['maps', function (maps) {
-  var map, selection, iwContent;
-  var infoWindow = new maps.InfoWindow();
+  var map, selection, infoWindow, iwContent;
   var markersPending = [];
   var markers = {};
   var listeners = [];
@@ -44,7 +43,7 @@ angular.module('concert-search')
   return {
     setInfoWindowContent: function (elt) {
       iwContent = elt;
-      infoWindow.setContent(elt);
+      this.setSelection(selection);
     },
     getInfoWindowContent: function () {
       return iwContent;
@@ -78,10 +77,15 @@ angular.module('concert-search')
       });
     },
     setSelection: function (data) {
+      if (!data) { return; }
       selection = data;
       var dataKey = key(data);
       var mrk = markers[dataKey];
-      if (mrk && map && infoWindow) {
+      if (mrk && map) {
+        infoWindow && infoWindow.close();
+        infoWindow = new maps.InfoWindow({
+          content: iwContent
+        });
         infoWindow.open(map, mrk);
       }
       listeners.forEach(function (l) {
