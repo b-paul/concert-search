@@ -50,7 +50,6 @@ angular.module('concert-search')
     },
     setMap: function (m) {
       map = m;
-      markers = {};
       var self = this;
       markersPending.forEach(function (bundle) {
         var mrk = bundle[0], data = bundle[1];
@@ -59,12 +58,12 @@ angular.module('concert-search')
       markersPending = [];
     },
     addMarker: function (mrk, data) {
+      var dataKey = key(data);
+      markers[dataKey] = mrk;
       if (!map) {
         markersPending.push([mrk, data]);
       } else {
         mrk.setMap(map);
-        var dataKey = key(data);
-        markers[dataKey] = mrk;
         if (data === selection) {
           this.setSelection(data);
         }

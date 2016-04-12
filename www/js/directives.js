@@ -79,10 +79,13 @@ angular.module('concert-search')
           var elt = firstElement(clone);
           // Set the info window to display the transcluded content when opened
           mapSelection.setInfoWindowContent(elt);
+          $scope.$on('selecttab', function () {
+            mapSelection.setInfoWindowContent(elt);
+          });
           // Listen for selection change and reflect each on scope
           mapSelection.onSelect(function onSelect(selectedMapData) {
             if (mapSelection.getInfoWindowContent() !== elt) {
-              return mapSelection.offSelect(onSelect);
+              return;
             }
             scope.selectedMapData = selectedMapData;
           });
@@ -90,6 +93,9 @@ angular.module('concert-search')
 
         mapController.getMap(function (map) {
           mapSelection.setMap(map);
+          $scope.$on('selecttab', function () {
+            mapSelection.setMap(map);
+          });
         });
 
         var markers = [];
