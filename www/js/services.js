@@ -26,6 +26,7 @@ angular.module('concert-search')
   return {
     lat: 43.07493,
     lng: -89.381388,
+    zoom: 15,
     radius: 25
   };
 }])
@@ -285,18 +286,17 @@ angular.module('concert-search')
   var size = al.defaultPageSize;
   var offset = 0;
 
-  var query = '.';
+  var query = '';
 
   var artistsLoaded;
   var loadArtists = function () {
-    console.log('loading ' + offset + '-' + size);
     // http://stackoverflow.com/a/6969486
     query = query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
     artistsLoaded = $http
       .get(
         'https://musicbrainz.org/ws/2/artist/',
         { params: {
-            query: 'artist:/' + query + '/',
+            query: 'artist:/' + (query || '.') + '/',
             offset: offset,
             limit: size - offset,
             fmt: 'json'
@@ -314,7 +314,6 @@ angular.module('concert-search')
   loadArtists();
 
   al.setSize = function (newSize) {
-    console.log('setSize');
     if (isNaN(newSize)) {
       throw new Error('Cannot setSize with non-number');
     }
@@ -325,7 +324,6 @@ angular.module('concert-search')
   };
 
   al.setQuery = function (newQuery) {
-    console.log('new query = ' + newQuery);
     query = newQuery;
     al.artists = [];
     size = al.defaultPageSize;
