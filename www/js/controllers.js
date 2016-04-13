@@ -1,25 +1,15 @@
-// createStyles may be mixed-into a controller to apply the
-// properties used for alternating between map and list display.
-var createStyles = function (ctrl) {
-  ctrl.styles = ['map', 'list'];
-  ctrl.style = 'map';
-  return ctrl;
-};
-
 angular.module('concert-search')
 
 .controller('EventsCtrl', ['eventsList', function (eventsList) {
-  createStyles(this);
   this.events = eventsList.events;
 }])
 
 .controller('VenuesCtrl', [
   '$scope', 'venuesList', 'mapPosition', 'mapSelection',
   function ($scope, venuesList, mapPosition, mapSelection) {
-    createStyles(this);
     this.venues = venuesList.venues;
     this.jumpToMap = function (venue) {
-      this.style = 'map';
+      $scope.viewStyle.style = 'map';
       mapPosition.lat = venue.latLng.lat;
       mapPosition.lng = venue.latLng.lng;
       mapSelection.setSelection(venue);

@@ -1,9 +1,5 @@
 <ion-view>
-  <radio-group name="style"
-               options="$ctrl.styles"
-               model="$ctrl.style">
-  </radio-group>
-  <div ng-if="$ctrl.style == 'map'">
+  <div ng-if="viewStyle.style == 'map'">
     <ion-content scroll="false">
       <map map-data="$ctrl.events">
         <!-- scope for event-view controlled by map-data directive -->
@@ -11,7 +7,7 @@
       </map>
     </ion-content>
   </div>
-  <div ng-if="$ctrl.style == 'list'">
+  <div ng-if="viewStyle.style == 'list'">
     <ion-content>
       <ion-list>
         <ion-item ng-repeat="event in $ctrl.events">

@@ -112,27 +112,22 @@ angular.module('concert-search')
   }
 })
 
-.directive('radioGroup', function () {
+.directive('viewstyleSelector', function () {
   return {
     template: ''
-      + '<div class="radiogroup"><form>'
-        + '<label ng-repeat="opt in $ctrl.options">'
+      + '<div class="radiogroup">'
+        + '<label ng-repeat="opt in [\'map\', \'list\']">'
           + '{{ opt }}'
-          + '<input type="radio" name="{{ $ctrl.name }}"'
+          + '<input type="radio" name="style"'
                  + 'value="{{ opt }}"'
-                 + 'ng-model="$ctrl.model">'
+                 + 'ng-model="viewStyle.style">'
         + '</label>'
-      + '</form></div>',
-    scope: {
-      name: '@',
-      options: '=',
-      model: '='
-    },
-    // controller included solely so that ng-model binds correctly to the
-    // outside scope.
-    bindToController: true,
-    controllerAs: '$ctrl',
-    controller: function () {}
+      + '</div>',
+    controller: ['$scope', function ($scope) {
+      $scope.viewStyle = {
+        style: 'map'
+      };
+    }]
   };
 })
 
