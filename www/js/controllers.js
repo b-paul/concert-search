@@ -1,3 +1,10 @@
+var makeJumpToMapFn = function ($scope) {
+  return function (venue) {
+    $scope.viewStyle.style = 'map';
+    $scope.$broadcast('selectmapdata', venue);
+  };
+};
+
 angular.module('concert-search')
 
 .controller('EventsCtrl', ['eventsList', function (eventsList) {
@@ -8,11 +15,7 @@ angular.module('concert-search')
   '$scope', 'venuesList', 'uiMap',
   function ($scope, venuesList, uiMap) {
     this.venues = venuesList.venues;
-    this.jumpToMap = function (venue) {
-      $scope.viewStyle.style = 'map';
-      uiMap.setCenter(venue.latitude, venue.longitude);
-      uiMap.setSelection(venue);
-    }
+    this.jumpToMap = makeJumpToMapFn($scope);
   }
 ])
 
@@ -21,6 +24,7 @@ angular.module('concert-search')
   function (venuesList, $stateParams) {
     this.venue = venuesList.getCanonicalVenue({id: $stateParams.venueId });
     this.events = this.venue.events;
+    this.jumpToMap = makeJumpToMapFn($scope);
   }
 ])
 

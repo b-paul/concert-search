@@ -130,7 +130,7 @@ angular.module('concert-search')
   };
 })
 
-.directive('mapView', ['maps', '$window', function(maps, $window) {
+.directive('mapView', ['maps', 'uiMap', '$window', function(maps, uiMap, $window) {
   var doc = $window.document;
   return {
     restrict: 'E',
@@ -166,6 +166,8 @@ angular.module('concert-search')
       };
 
       var showInfo = function (data) {
+        console.log(data);
+        console.log(infoWindow);
         info = data;
         var dataKey = getKey(info);
         var marker = markersDict[dataKey];
@@ -173,34 +175,36 @@ angular.module('concert-search')
           info = null;
           return infoWindow.close();
         }
-        angular.extend(infoScope, info);
-        infoWindow.open(map, marker);
+        infoScope.$apply(function () {
+          infoScope.selectedMapData = info;
+          infoWindow.open(map, marker);
+        });
       };
 
-      $scope.$on('selectmapdata', function (evt, data) { showInfo(data); });
+      $scope.$on('selectmapdata', function (evt, data) {
+        console.log('here');
+        map.setCenter(new maps.LatLng(data.latitude, data.longitude));
+        showInfo(data);
+      });
 
       var setMarkers = function () {
         markers.forEach(function (marker) { marker.setMap(null); });
         markersDict = {};
-        console.log(map);
-        console.log($scope.mapData);
         markers = $scope.mapData.map(function (data) {
           var dataKey = getKey(data);
           var marker = new maps.Marker({
-            map: map,
-            location: new maps.LatLng(data.latitude, data.longitude),
+            position: new maps.LatLng(data.latitude, data.longitude),
             title: data.title
           });
+          marker.setMap(map);
           markersDict[dataKey] = marker;
           marker.addListener('click', function () { showInfo(data); });
           return marker;
         });
-        console.log(markers);
         info && showInfo(info);
       };
 
       var initialize = function () {
-        console.log(firstElement($element));
         map = new maps.Map(firstElement($element), {
           center: new maps.LatLng(32.756784, -97.070123),
           zoom: 13,
@@ -208,6 +212,7 @@ angular.module('concert-search')
           mapTypeControl: false,
           streetViewControl: false
         });
+        uiMap.setMap(map);
 
         $scope.$watchCollection('mapData', setMarkers);
       };

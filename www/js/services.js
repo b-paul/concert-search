@@ -21,116 +21,127 @@ angular.module('concert-search')
   return maps;
 }])
 
-// .factory('uiMap', ['maps', function (maps) {
-//   var selection;
-//   var mapNode = angular.element('<div />').css({ height: '100%' });
-//   var map = new maps.Map(mapNode[0], {
-//     center: new maps.LatLng(32.756784, -97.070123),
-//     zoom: 13,
-//     mapTypeId: maps.MapTypeId.ROADMAP,
-//     mapTypeControl: false,
-//     streetViewControl: false
-//   });
-//   var infoWindow = new maps.InfoWindow();
-//   var markers = [];
-//   var markersDict = {};
-//   var listeners = [];
+.factory('uiMap', ['maps', function (maps) {
+  var selection;
+  // var mapNode = angular.element('<div />').css({ height: '100%' });
+  // var map = new maps.Map(mapNode[0], {
+  //   center: new maps.LatLng(32.756784, -97.070123),
+  //   zoom: 13,
+  //   mapTypeId: maps.MapTypeId.ROADMAP,
+  //   mapTypeControl: false,
+  //   streetViewControl: false
+  // });
+  var map;
+  // var infoWindow = new maps.InfoWindow();
+  // var markers = [];
+  // var markersDict = {};
+  // var listeners = [];
 
-//   var getKey = function (data) {
-//     return data.id;
-//   };
+  // var getKey = function (data) {
+  //   return data.id;
+  // };
 
-//   var checkWindow = function () {
-//     if (!selection) { return; }
-//     var dataKey = getKey(selection);
-//     var mrk = markers[dataKey];
-//     if (mrk && selection) {
-//       setTimeout(function () {
-//         infoWindow.open(map, mrk);
-//       }, 0);
-//     } else {
-//       infoWindow.close();
-//     }
-//   };
+  // var checkWindow = function () {
+  //   if (!selection) { return; }
+  //   var dataKey = getKey(selection);
+  //   var mrk = markers[dataKey];
+  //   if (mrk && selection) {
+  //     setTimeout(function () {
+  //       infoWindow.open(map, mrk);
+  //     }, 0);
+  //   } else {
+  //     infoWindow.close();
+  //   }
+  // };
 
-//   return {
-//     getMapNode: function () {
-//       return mapNode;
-//     },
-//     getMap: function () {
-//       return map;
-//     },
-//     setInfoWindowContent: function (content, scope, scopeProperty) {
-//       infoWindow.setContent(content);
-//       if (scope && scopeProperty) {
-//         scope[scopeProperty] = selection;
-//       }
-//       checkWindow();
-//     },
-//     setData: function (data) {
-//       markers.forEach(function (m) {
-//         m.setMap(null);
-//       });
-//       markersDict = {};
-//       markers = data.map(function (d) {
-//         var dataKey = getKey(d);
-//         var mrk = new maps.Marker({
-//           position: new maps.LatLng(d.latitude, d.longitude),
-//           title: d.title
-//         });
-//         markersDict[dataKey] = mrk;
-//         mrk.setMap(map);
-//         return mrk;
-//       });
-//       checkWindow();
-//     },
-//     setSelection: function (data) {
-//       selection = data || selection;
-//       data && listeners.forEach(function (l) {
-//         l(data);
-//       });
-//       checkWindow();
-//     },
-//     onSelect: function (listener) {
-//       listeners.push(listener);
-//     },
-//     offSelect: function (listener) {
-//       listeners = listeners.filter(function (l) { return l !== listener; });
-//     }
-//   }
-// }])
+  return {
+    // getMapNode: function () {
+    //   return mapNode;
+    // },
+    setMap: function (m) {
+      map = m;
+    },
+    getMap: function () {
+      return map;
+    },
+    // setInfoWindowContent: function (content, scope, scopeProperty) {
+    //   infoWindow.setContent(content);
+    //   if (scope && scopeProperty) {
+    //     scope[scopeProperty] = selection;
+    //   }
+    //   checkWindow();
+    // },
+    // setData: function (data) {
+    //   markers.forEach(function (m) {
+    //     m.setMap(null);
+    //   });
+    //   markersDict = {};
+    //   markers = data.map(function (d) {
+    //     var dataKey = getKey(d);
+    //     var mrk = new maps.Marker({
+    //       position: new maps.LatLng(d.latitude, d.longitude),
+    //       title: d.title
+    //     });
+    //     markersDict[dataKey] = mrk;
+    //     mrk.setMap(map);
+    //     return mrk;
+    //   });
+    //   checkWindow();
+    // },
+    // setSelection: function (data) {
+    //   selection = data || selection;
+    //   data && listeners.forEach(function (l) {
+    //     l(data);
+    //   });
+    //   checkWindow();
+    // },
+    // onSelect: function (listener) {
+    //   listeners.push(listener);
+    // },
+    // offSelect: function (listener) {
+    //   listeners = listeners.filter(function (l) { return l !== listener; });
+    // }
+  }
+}])
 
 .factory('eventsList', [
   'APPID', '$http', 'uiMap',
   function (APPID, $http, uiMap) {
     var events = [];
 
-    var map = uiMap.getMap();
-    var center = map.getCenter();
-    var latitude = center.lat();
-    var longitude = center.lng();
-    var radius = 5;
-    var eventsLoaded = $http.jsonp(
-      '//api.bandsintown.com/events/search.json',
-      { params: {
-          location: latitude + ',' + longitude,
-          radius: radius,
-          callback: 'JSON_CALLBACK',
-          app_id: APPID
-        } }
-    );
+    var map;
+    var eventsLoaded;
+    var clear = setInterval(function () {
+      map = uiMap.getMap();
+      if (!map) { return; }
+      var center = map.getCenter();
+      var latitude = center.lat();
+      var longitude = center.lng();
+      var radius = 5;
+      clearInterval(clear);
+      eventsLoaded = $http.jsonp(
+        '//api.bandsintown.com/events/search.json',
+        { params: {
+            location: latitude + ',' + longitude,
+            radius: radius,
+            callback: 'JSON_CALLBACK',
+            app_id: APPID
+          } }
+      );
 
-    eventsLoaded
-      .then(function (res) {
-        if (res.data.errors) {
-          throw new Error(res.data.errors[0]);
-        }
-        [].push.apply(events, res.data.map(processEvent));
-      })
-      .catch(function (err) {
-        console.error('An error occurred while loading events list.');
-        console.error(err);
-      });
+      eventsLoaded
+        .then(function (res) {
+          if (res.data.errors) {
+            throw new Error(res.data.errors[0]);
+          }
+          [].push.apply(events, res.data.map(processEvent));
+        })
+        .catch(function (err) {
+          console.error('An error occurred while loading events list.');
+          console.error(err);
+        });
+    }, 100);
+
 
     return {
       events: events
@@ -163,13 +174,14 @@ angular.module('concert-search')
     $rootScope.$watchCollection(
       function () { return eventsList.events; },
       function () {
-        vl.venues = eventsList.events.reduce(function (acc, event) {
+        var newVenues = eventsList.events.reduce(function (acc, event) {
           var venue = vl.getCanonicalVenue(event.venue);
           if (acc.indexOf(venue) + 1) {
             return acc;
           }
           return acc.concat(venue);
         }, []);
+        [].splice.apply(vl.venues, [0, vl.venues.length].concat(newVenues));
       }
     );
 
@@ -201,7 +213,7 @@ angular.module('concert-search')
     vl.fetchAddress = function (venue) {
       var options = {
         query: venue.name,
-        location: new maps.LatLng(venue.latLng.lat, venue.latLng.lng),
+        location: new maps.LatLng(venue.latitude, venue.longitude),
         radius: 100
       };
 
@@ -214,7 +226,7 @@ angular.module('concert-search')
             // Retry on failure with geocoder based on lat/lng only. Expecting
             //   this to be less exact, intuitively, but have not tested.
             return geo.geocode(
-              { location: { lat: venue.latLng.lat, lng: venue.latLng.lng } },
+              { location: { lat: venue.latitude, lng: venue.longitude } },
               function (res, status) {
                 match = res && res[0];
                 if (status !== maps.GeocoderStatus.OK || !match) {
@@ -237,8 +249,8 @@ angular.module('concert-search')
           venue.address = match.formatted_address;
           venue.rating = match.rating;
           venue.attrib = match.html_attribution;
-          venue.latLng.lat = match.geometry.location.lat();
-          venue.latLng.lng = match.geometry.location.lng();
+          venue.latitude = match.geometry.location.lat();
+          venue.longitude = match.geometry.location.lng();
           return venue;
         });
       });

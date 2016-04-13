@@ -2,7 +2,6 @@
   <div ng-if="viewStyle.style == 'map'">
     <ion-content scroll="false">
       <map-view map-data="$ctrl.venues">
-        <!-- scope for venue-view controlled by map-data directive -->
         <venue-view dynamic venue="selectedMapData"></venue-view>
       </map-view>
     </ion-content>
