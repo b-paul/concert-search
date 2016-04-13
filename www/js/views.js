@@ -36,7 +36,7 @@ angular.module('concert-search')
     controller: [
       '$scope', 'venuesList', 'mapPosition', 'mapSelection',
       function ($scope, venuesList, mapPosition, mapSelection) {
-      createStyles(this);
+        createStyles(this);
         this.venues = venuesList.venues;
         this.jumpToMap = function (venue) {
           this.style = 'map';
@@ -58,9 +58,26 @@ angular.module('concert-search')
     bindToController: true,
     controllerAs: '$ctrl',
     controller: [
-      'artistsList', 'favoriteArtists',
-      function (artistsList) {
+      '$scope', 'artistsList', 'favoriteArtists', 'debounce',
+      function ($scope, artistsList, favoriteArtists, debounce) {
         this.artists = artistsList.artists;
+        this.artistFilter = '';
+
+        this.filterArtists = debounce(function () {
+          artistsList.setQuery(this.artistFilter);
+          // artistsList resets this property. Leaky abstraction. Not cool.
+          this.artists = artistsList.artists;
+        });
+
+        this.loadArtists = function () {
+          console.log('loadArtists');
+          var artistsLoaded = artistsList.setSize(
+            this.artists.length + artistsList.defaultPageSize
+          );
+          artistsLoaded.then(function () {
+            $scope.$broadcast('scroll.infiniteScrollComplete');
+          });
+        };
       }
     ]
   };

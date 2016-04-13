@@ -201,7 +201,6 @@ angular.module('concert-search')
       }
     );
 
-    var fetcher = new ThrottledResource();
     vl.getCanonicalVenue = function (venue) {
       var canonical = venuesById[venue.id];
       if (!canonical) {
@@ -210,6 +209,9 @@ angular.module('concert-search')
       }
       return canonical;
     };
+
+    var fetcher = new ThrottledResource();
+
     vl.fetchEvents = function (venue) {
       var eventsLoaded = $http.jsonp(
         '//api.bandsintown.com/venues/' + venue.id + '/events.json',
@@ -223,6 +225,7 @@ angular.module('concert-search')
         venue.events = res.data;
       });
     };
+
     vl.fetchAddress = function (venue) {
       var options = {
         query: venue.name,
@@ -274,30 +277,65 @@ angular.module('concert-search')
 ])
 
 .factory('artistsList', ['$http', function ($http) {
-    var artists = [];
+  var al = {
+    artists: []
+  };
 
-    var artistsLoaded = $http.get(
-      'https://musicbrainz.org/ws/2/artist/',
-      { params: {
-          query: 'artist:/./',
-          fmt: 'json'
-        } }
-    );
+  al.defaultPageSize = 10;
+  var size = al.defaultPageSize;
+  var offset = 0;
 
-    artistsLoaded
+  var query = '.';
+
+  var artistsLoaded;
+  var loadArtists = function () {
+    console.log('loading ' + offset + '-' + size);
+    // http://stackoverflow.com/a/6969486
+    query = query.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\\$&");
+    artistsLoaded = $http
+      .get(
+        'https://musicbrainz.org/ws/2/artist/',
+        { params: {
+            query: 'artist:/' + query + '/',
+            offset: offset,
+            limit: size - offset,
+            fmt: 'json'
+          } }
+      )
       .then(function (res) {
-        [].push.apply(artists, res.data.artists);
-      })
-      .catch(function (err) {
-        console.error('An error occurred while loading artists list.')
-        console.error(err);
+        [].push.apply(al.artists, res.data.artists);
       });
 
-    return {
-      artists: artists
-    };
-  }
-])
+    artistsLoaded.catch(function (err) {
+      console.error('An error occurred while loading artists list.')
+      console.error(err);
+    });
+  };
+  loadArtists();
+
+  al.setSize = function (newSize) {
+    console.log('setSize');
+    if (isNaN(newSize)) {
+      throw new Error('Cannot setSize with non-number');
+    }
+    offset = size;
+    size = newSize;
+    artistsLoaded = artistsLoaded.then(loadArtists);
+    return artistsLoaded;
+  };
+
+  al.setQuery = function (newQuery) {
+    console.log('new query = ' + newQuery);
+    query = newQuery;
+    al.artists = [];
+    size = al.defaultPageSize;
+    offset = 0;
+    artistsLoaded = artistsLoaded.then(loadArtists);
+    return artistsLoaded;
+  };
+
+  return al;
+}])
 
 .factory('favoriteArtists', function () {
   var favorites = {};
