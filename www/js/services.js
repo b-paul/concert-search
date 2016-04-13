@@ -27,7 +27,7 @@ angular.module('concert-search')
     lat: 43.07493,
     lng: -89.381388,
     zoom: 15,
-    radius: 25
+    radius: 5
   };
 }])
 

@@ -38,7 +38,6 @@ angular.module('concert-search')
     });
 
     this.loadArtists = function () {
-      console.log('loadArtists');
       var artistsLoaded = artistsList.setSize(
         this.artists.length + artistsList.defaultPageSize
       );
