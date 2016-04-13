@@ -34,7 +34,7 @@ angular.module('concert-search')
   .state('app.venue-events', {
     url: '/venues/:venueId/events',
     views: {
-      'venue-events-view': {
+      'venues-view': {
         templateUrl: '/templates/venue-events-view.html',
         controller: 'VenueEventsCtrl',
         controllerAs: '$ctrl'

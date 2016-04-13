@@ -17,6 +17,14 @@ angular.module('concert-search')
   }
 ])
 
+.controller('VenueEventsCtrl', [
+  'venuesList', '$stateParams',
+  function (venuesList, $stateParams) {
+    this.venue = venuesList.getCanonicalVenue({id: $stateParams.venueId });
+    this.events = this.venue.events;
+  }
+])
+
 .controller('ArtistsCtrl', [
   '$scope', 'artistsList', 'favoriteArtists', 'debounce',
   function ($scope, artistsList, favoriteArtists, debounce) {

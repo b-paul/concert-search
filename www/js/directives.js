@@ -8,7 +8,7 @@ angular.module('concert-search')
       + '</two-line-address>'
       + '<p ng-if="venue.rating">Average rating: {{ venue.rating }}</p>'
       + '<p ng-bind-html="venue.attrib"></p>'
-      + '<a href="#" ng-click="$event.preventDefault()">'
+      + '<a ng-href="#/app/venues/{{ venue.id }}/events">'
         + '{{ venue.events.length }} upcoming events'
       + '</a>',
     scope: {
@@ -82,7 +82,7 @@ angular.module('concert-search')
 .directive('twoLineAddress', function () {
   return {
     template: ''
-      + '<a href="#" ng-click="inspect(address, $event)">'
+      + '<a href="#/app/venues" ng-click="inspect(address)">'
         + '<div class="address-line1">{{ line1 }}</div>'
         + '<div class="address-line2">{{ line2 }}</div>'
       + '</a>',
@@ -91,8 +91,7 @@ angular.module('concert-search')
       onInspect: '&'
     },
     link: function ($scope, $element, $attr) {
-      $scope.inspect = function (address, $event) {
-        $event && $event.preventDefault();
+      $scope.inspect = function (address) {
         $scope.onInspect();
       };
 

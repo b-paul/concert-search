@@ -1,1 +1,10 @@
-<ion-view></ion-view>
+<ion-view>
+  <ion-content>
+    <venue-view venue="$ctrl.venue"></venue-view>
+    <ion-list>
+      <ion-item ng-repeat="event in $ctrl.events">
+        <event-view event="event"></event-view>
+      </ion-item>
+    </ion-list>
+  </ion-content>
+</ion-view>
