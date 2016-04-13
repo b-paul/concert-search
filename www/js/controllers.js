@@ -5,14 +5,13 @@ angular.module('concert-search')
 }])
 
 .controller('VenuesCtrl', [
-  '$scope', 'venuesList', 'mapPosition', 'mapSelection',
-  function ($scope, venuesList, mapPosition, mapSelection) {
+  '$scope', 'venuesList', 'uiMap',
+  function ($scope, venuesList, uiMap) {
     this.venues = venuesList.venues;
     this.jumpToMap = function (venue) {
       $scope.viewStyle.style = 'map';
-      mapPosition.lat = venue.latLng.lat;
-      mapPosition.lng = venue.latLng.lng;
-      mapSelection.setSelection(venue);
+      uiMap.setCenter(venue.latitude, venue.longitude);
+      uiMap.setSelection(venue);
     }
   }
 ])

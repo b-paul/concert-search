@@ -21,96 +21,100 @@ angular.module('concert-search')
   return maps;
 }])
 
-.factory('mapPosition', [function () {
-  // Set initial values
-  return {
-    lat: 43.07493,
-    lng: -89.381388,
-    zoom: 15,
-    radius: 5
-  };
-}])
+// .factory('uiMap', ['maps', function (maps) {
+//   var selection;
+//   var mapNode = angular.element('<div />').css({ height: '100%' });
+//   var map = new maps.Map(mapNode[0], {
+//     center: new maps.LatLng(32.756784, -97.070123),
+//     zoom: 13,
+//     mapTypeId: maps.MapTypeId.ROADMAP,
+//     mapTypeControl: false,
+//     streetViewControl: false
+//   });
+//   var infoWindow = new maps.InfoWindow();
+//   var markers = [];
+//   var markersDict = {};
+//   var listeners = [];
 
-.factory('mapSelection', ['maps', function (maps) {
-  var map, selection, infoWindow, iwContent;
-  var markersPending = [];
-  var markers = {};
-  var listeners = [];
+//   var getKey = function (data) {
+//     return data.id;
+//   };
 
-  var key = function (data) {
-    return data.id;
-  };
+//   var checkWindow = function () {
+//     if (!selection) { return; }
+//     var dataKey = getKey(selection);
+//     var mrk = markers[dataKey];
+//     if (mrk && selection) {
+//       setTimeout(function () {
+//         infoWindow.open(map, mrk);
+//       }, 0);
+//     } else {
+//       infoWindow.close();
+//     }
+//   };
 
-  return {
-    setInfoWindowContent: function (elt) {
-      iwContent = elt;
-      this.setSelection(selection);
-    },
-    getInfoWindowContent: function () {
-      return iwContent;
-    },
-    setMap: function (m) {
-      map = m;
-      var self = this;
-      markersPending.forEach(function (bundle) {
-        var mrk = bundle[0], data = bundle[1];
-        self.addMarker(mrk, data);
-      });
-      markersPending = [];
-    },
-    addMarker: function (mrk, data) {
-      var dataKey = key(data);
-      markers[dataKey] = mrk;
-      if (!map) {
-        markersPending.push([mrk, data]);
-      } else {
-        mrk.setMap(map);
-        if (data === selection) {
-          this.setSelection(data);
-        }
-      }
-    },
-    removeMarker: function (mrk) {
-      mrk.setMap(null);
-      Object.keys(markers).forEach(function (k) {
-        if (markers[k] === mrk) { delete markers[k]; }
-      });
-    },
-    setSelection: function (data) {
-      if (!data) { return; }
-      selection = data;
-      var dataKey = key(data);
-      var mrk = markers[dataKey];
-      if (mrk && map) {
-        infoWindow && infoWindow.close();
-        infoWindow = new maps.InfoWindow({
-          content: iwContent
-        });
-        infoWindow.open(map, mrk);
-      }
-      listeners.forEach(function (l) {
-        l(data);
-      });
-    },
-    onSelect: function (listener) {
-      listeners.push(listener);
-    },
-    offSelect: function (listener) {
-      listeners = listeners.filter(function (l) { return l !== listener; });
-    }
-  }
-}])
+//   return {
+//     getMapNode: function () {
+//       return mapNode;
+//     },
+//     getMap: function () {
+//       return map;
+//     },
+//     setInfoWindowContent: function (content, scope, scopeProperty) {
+//       infoWindow.setContent(content);
+//       if (scope && scopeProperty) {
+//         scope[scopeProperty] = selection;
+//       }
+//       checkWindow();
+//     },
+//     setData: function (data) {
+//       markers.forEach(function (m) {
+//         m.setMap(null);
+//       });
+//       markersDict = {};
+//       markers = data.map(function (d) {
+//         var dataKey = getKey(d);
+//         var mrk = new maps.Marker({
+//           position: new maps.LatLng(d.latitude, d.longitude),
+//           title: d.title
+//         });
+//         markersDict[dataKey] = mrk;
+//         mrk.setMap(map);
+//         return mrk;
+//       });
+//       checkWindow();
+//     },
+//     setSelection: function (data) {
+//       selection = data || selection;
+//       data && listeners.forEach(function (l) {
+//         l(data);
+//       });
+//       checkWindow();
+//     },
+//     onSelect: function (listener) {
+//       listeners.push(listener);
+//     },
+//     offSelect: function (listener) {
+//       listeners = listeners.filter(function (l) { return l !== listener; });
+//     }
+//   }
+// }])
 
 .factory('eventsList', [
-  'APPID', 'mapPosition', '$http',
-  function (APPID, mapPosition, $http) {
+  'APPID', '$http', 'uiMap',
+  function (APPID, $http, uiMap) {
     var events = [];
 
+    var map = uiMap.getMap();
+    var center = map.getCenter();
+    var latitude = center.lat();
+    var longitude = center.lng();
+    var radius = 5;
     var eventsLoaded = $http.jsonp(
       '//api.bandsintown.com/events/search.json',
       { params: {
-          location: mapPosition.lat + ',' + mapPosition.lng,
-          radius: mapPosition.radius,
+          location: latitude + ',' + longitude,
+          radius: radius,
           callback: 'JSON_CALLBACK',
           app_id: APPID
         } }
@@ -144,39 +148,6 @@ angular.module('concert-search')
   };
 })  
 
-.factory('eventsList', [
-  'APPID', 'mapPosition', '$http',
-  function (APPID, mapPosition, $http) {
-    var events = [];
-
-    var eventsLoad = $http.jsonp(
-      'http://api.bandsintown.com/events/search.json',
-      { params: {
-          location: mapPosition.lat + ',' + mapPosition.lng,
-          radius: mapPosition.radius,
-          callback: 'JSON_CALLBACK',
-          app_id: APPID
-        } }
-    );
-
-    eventsLoad
-      .then(function (res) {
-        if (res.data.errors) {
-          throw new Error(res.data.errors[0]);
-        }
-        [].push.apply(events, res.data.map(processEvent));
-      })
-      .catch(function (err) {
-        console.error('An error occurred while loading events list.');
-        console.error(err);
-      });
-
-    return {
-      events: events
-    };
-  }
-])
-
 .factory('venuesList', [
   'APPID', 'maps', 'eventsList', 'ThrottledResource',
   '$rootScope', '$q', '$http',
@@ -205,7 +176,7 @@ angular.module('concert-search')
     vl.getCanonicalVenue = function (venue) {
       var canonical = venuesById[venue.id];
       if (!canonical) {
-        canonical = processVenue(venue);
+        canonical = venue;
         venuesById[canonical.id] = canonical;
       }
       return canonical;
@@ -426,18 +397,8 @@ angular.module('concert-search')
   };
 });
 
-var processEvent = function (rawEvent) {
-  rawEvent.latLng = {
-    lat: rawEvent.venue.latitude,
-    lng: rawEvent.venue.longitude
-  };
-  return rawEvent;
-};
-
-var processVenue = function (rawVenue) {
-  rawVenue.latLng = {
-    lat: rawVenue.latitude,
-    lng: rawVenue.longitude
-  };
-  return rawVenue;
+var processEvent = function (eventData) {
+  eventData.latitude = eventData.venue.latitude;
+  eventData.longitude = eventData.venue.longitude;
+  return eventData;
 };

@@ -1,10 +1,10 @@
 <ion-view>
   <div ng-if="viewStyle.style == 'map'">
     <ion-content scroll="false">
-      <map map-data="$ctrl.events">
+      <map-view map-data="$ctrl.events">
         <!-- scope for event-view controlled by map-data directive -->
         <event-view event="selectedMapData"></event-view>
-      </map>
+      </map-view>
     </ion-content>
   </div>
   <div ng-if="viewStyle.style == 'list'">

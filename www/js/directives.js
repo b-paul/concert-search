@@ -130,140 +130,93 @@ angular.module('concert-search')
   };
 })
 
-.directive('map', [
-  'maps', 'mapPosition', 'mapSelection',
-  function(maps, mapPosition, mapSelection) {
-    return {
-      restrict: 'E',
-      controller: function () {
-        var map;
-        var waitingForMap = [];
-        var ctrl = this;
+.directive('mapView', ['maps', '$window', function(maps, $window) {
+  var doc = $window.document;
+  return {
+    restrict: 'E',
+    scope: {
+      mapData: '=',
+    },
+    transclude: true,
+    link: function ($scope, $element, $attr, $ctrl, $transclude) {
+      var map, infoWindow, infoScope, info;
 
-        ctrl.getMap = function (cb) {
-          if (map) {
-            cb(map);
-          } else {
-            waitingForMap.push(cb);
+      var firstElement = function ($dom) {
+        for (var i = 0, l = $dom.length; i < l; i++) {
+          if ($dom[i] instanceof HTMLElement) {
+            return $dom[i];
           }
-        };
-
-        ctrl.setMap = function(_map_) {
-          map = _map_;
-          waitingForMap.forEach(function (cb) {
-            ctrl.getMap(cb);
-          });
-          waitingForMap = [];
-        };
-      },
-      link: function ($scope, $element, $attr, $ctrl) {
-        var map;
-        var initialize = function () {
-          var mapOptions = {
-            center: new maps.LatLng(mapPosition.lat, mapPosition.lng),
-            zoom: mapPosition.zoom,
-            mapTypeId: maps.MapTypeId.ROADMAP,
-            mapTypeControl: false,
-            streetViewControl: false
-          };
-          map = new maps.Map($element[0], mapOptions);
-          mapSelection.setMap(map);
-          $scope.$on('$ionicView.enter', function () {
-            mapSelection.setMap(map);
-          });
-
-          map.addListener('center_changed', function () {
-            mapPosition.lat = map.getCenter().lat();
-            mapPosition.lng = map.getCenter().lng();
-          });
-
-          map.addListener('zoom_changed', function () {
-            mapPosition.zoom = map.getZoom();
-          });
-        };
-
-        if (document.readyState === "complete") {
-          initialize();
-        } else {
-          maps.event.addDomListener(window, 'load', initialize);
         }
+      };
 
-        $scope.$watchCollection(
-          function () { return mapPosition; },
-          function () {
-            if (!map) { return; }
-            map.setCenter(new maps.LatLng(mapPosition.lat, mapPosition.lng));
-            map.setZoom(mapPosition.zoom);
-          }
-        );
-      }
-    }
-  }]
-)
+      // Access the transcluded element(s) and scope
+      $transclude(function (tClone, tScope) {
+        var elt = firstElement(tClone);
+        infoWindow = new maps.InfoWindow({
+          content: elt
+        });
+        infoScope = tScope;
+      });
 
-.directive('mapData', [
-  'maps', 'mapSelection', 'venuesList',
-  function (maps, mapSelection, venuesList) {
-    return {
-      restrict: 'A',
-      scope: {
-        mapData: '='
-      },
-      transclude: true,
-      link: function ($scope, $element, $attr, $ctrl, $transclude) {
-        var firstElement = function ($dom) {
-          for (var i = 0, l = $dom.length; i < l; i++) {
-            if ($dom[i] instanceof HTMLElement) {
-              return $dom[i];
-            }
-          }
-        };
+      var markers = [];
+      var markersDict = {};
 
-        // Access the transcluded element(s) and scope
-        $transclude($scope.$new(), function (clone, scope) {
-          var elt = firstElement(clone);
-          // Set the info window to display the transcluded content when opened
-          mapSelection.setInfoWindowContent(elt);
-          $scope.$on('$ionicView.enter', function () {
-            mapSelection.setInfoWindowContent(elt);
+      var getKey = function (data) {
+        return data.id;
+      };
+
+      var showInfo = function (data) {
+        info = data;
+        var dataKey = getKey(info);
+        var marker = markersDict[dataKey];
+        if (!info || !marker) {
+          info = null;
+          return infoWindow.close();
+        }
+        angular.extend(infoScope, info);
+        infoWindow.open(map, marker);
+      };
+
+      $scope.$on('selectmapdata', function (evt, data) { showInfo(data); });
+
+      var setMarkers = function () {
+        markers.forEach(function (marker) { marker.setMap(null); });
+        markersDict = {};
+        console.log(map);
+        console.log($scope.mapData);
+        markers = $scope.mapData.map(function (data) {
+          var dataKey = getKey(data);
+          var marker = new maps.Marker({
+            map: map,
+            location: new maps.LatLng(data.latitude, data.longitude),
+            title: data.title
           });
-          // Listen for selection change and reflect each on scope
-          mapSelection.onSelect(function onSelect(selectedMapData) {
-            if (mapSelection.getInfoWindowContent() !== elt) {
-              return;
-            }
-            scope.selectedMapData = selectedMapData;
-          });
+          markersDict[dataKey] = marker;
+          marker.addListener('click', function () { showInfo(data); });
+          return marker;
+        });
+        console.log(markers);
+        info && showInfo(info);
+      };
+
+      var initialize = function () {
+        console.log(firstElement($element));
+        map = new maps.Map(firstElement($element), {
+          center: new maps.LatLng(32.756784, -97.070123),
+          zoom: 13,
+          mapTypeId: maps.MapTypeId.ROADMAP,
+          mapTypeControl: false,
+          streetViewControl: false
         });
 
-        var markers = [];
+        $scope.$watchCollection('mapData', setMarkers);
+      };
 
-        var updateMarkers = function () {
-          markers.forEach(function (m) {
-            mapSelection.removeMarker(m);
-          });
-          markers = [];
-
-          $scope.mapData.forEach(function (data) {
-            var marker = new maps.Marker({
-              position: new maps.LatLng(
-                data.latLng.lat, data.latLng.lng
-              ),
-              title: data.title
-            });
-            mapSelection.addMarker(marker, data);
-            marker.addListener('click', function () {
-              $scope.$apply(function () {
-                mapSelection.setSelection(data);
-              });
-            });
-            markers.push(marker);
-          });
-        };
-
-        updateMarkers();
-        $scope.$watchCollection('mapData', updateMarkers);
+      if (doc.readyState === "complete") {
+        initialize();
+      } else {
+        maps.event.addDomListener($window, 'load', initialize);
       }
     }
   }
-]);
+}]);
