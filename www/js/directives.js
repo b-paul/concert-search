@@ -115,14 +115,15 @@ angular.module('concert-search')
   return {
     template: ''
       + '<form class="radiogroup">'
-        + '<label ng-repeat="opt in [\'map\', \'list\']">'
+        + '<label for="{{ id }}" ng-repeat="opt in [\'map\', \'list\']">'
           + '{{ opt }}'
-          + '<input type="radio" name="style"'
+          + '<input type="radio" name="style" id="{{ id }}"'
                  + 'value="{{ opt }}"'
                  + 'ng-model="viewStyle.style">'
         + '</label>'
       + '</form>',
     scope: {
+      id: '@',
       viewStyle: '='
     }
   };

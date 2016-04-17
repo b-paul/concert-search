@@ -1,5 +1,6 @@
 <ion-view>
-  <viewstyle-selector view-style="$ctrl.viewStyle"></viewstyle-selector>
+  <viewstyle-selector id="events-viewstyle" view-style="$ctrl.viewStyle">
+  </viewstyle-selector>
   <div ng-if="$ctrl.viewStyle.style == 'map'">
     <ion-content scroll="false">
       <map-view map-data="$ctrl.events">
