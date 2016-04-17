@@ -27,7 +27,7 @@ angular.module('concert-search')
               $scope.venue.address = 'Unable to load address';
             });
           }
-          if (('dynamic' in $attr) || !$scope.venue.address) {
+          if (('dynamic' in $attr) || !$scope.venue.events) {
             venuesList.fetchEvents($scope.venue);
           }
           if (!('dynamic' in $attr)) {
@@ -166,8 +166,6 @@ angular.module('concert-search')
           return data.id;
         };
 
-        var lastInfoWindow;
-        var lastMarker;
         var showInfo = function (data) {
           mapPosition.info = data;
           var dataKey = getKey(data);
