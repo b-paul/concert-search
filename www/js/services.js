@@ -236,10 +236,11 @@ angular.module('concert-search')
   return al;
 }])
 
-.factory('favoriteArtists', function () {
-  var favorites = {};
+.factory('favoriteArtists', ['storage', function (storage) {
+  var favorites = storage.get('favorites') || {};
+
   return {
-    length: 0,
+    length: Object.keys(favorites).length,
     contains: function (id) {
       return (id in favorites);
     },
@@ -249,16 +250,33 @@ angular.module('concert-search')
       }
       this.length++;
       favorites[id] = true;
+      storage.save('favorites', favorites);
     },
     remove: function (id) {
       this.length--;
       delete favorites[id];
+      storage.save('favorites', favorites);
     },
     toggle: function (id) {
-      return this.contains(id) ? this.remove(id) : this.add(id)
+      this.contains(id) ? this.remove(id) : this.add(id);
     }
   };
-})
+}])
+
+.factory('storage', ['APPID', function (APPID) {
+  var store = JSON.parse(localStorage.getItem(APPID) || '{}');
+
+  return {
+    save: function (key, value) {
+      store[key] = value;
+      console.log(store);
+      localStorage.setItem(APPID, JSON.stringify(store));
+    },
+    get: function (key) {
+      return store.key;
+    }
+  };
+}])
 
 .factory('ThrottledResource', ['$q', '$timeout', function ($q, $timeout) {
   return function ThrottledResource() {
