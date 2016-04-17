@@ -17,4 +17,22 @@
       </ion-list>
     </ion-content>
   </div>
+  <form class="floatingcontrols">
+    <label class="controlbutton controlbutton-expander" id="radius-input">
+      Radius: {{ $ctrl.searchOptions.radius }}
+      <input id="radius-input" type="range" min="1" max="150"
+             ng-model="$ctrl.searchOptions.radius">
+    </label>
+    <label class="controlbutton" id="filtering-checkbox">
+      Showing:
+      <span ng-if="$ctrl.searchOptions.filtering">
+        favorite artists only
+      </span>
+      <span ng-if="!$ctrl.searchOptions.filtering">
+        all artists
+      </span>
+      <input id="filtering-checkbox" type="checkbox" name="filtering"
+             ng-model="$ctrl.searchOptions.filtering">
+    </label>
+  </form>
 </ion-view>

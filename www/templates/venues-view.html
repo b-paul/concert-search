@@ -18,4 +18,10 @@
       </ion-list>
     </ion-content>
   </div>
+  <form class="floatingcontrols">
+    <label class="controlbutton controlbutton-expander" id="radius-input">
+      Radius: {{ $ctrl.searchOptions.radius }}
+      <input id="radius-input" type="range" min="1" max="150"
+             ng-model="$ctrl.searchOptions.radius">
+    </label>
 </ion-view>
