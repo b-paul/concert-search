@@ -1,30 +1,40 @@
-var makeJumpToMapFn = function ($scope) {
-  return function (venue) {
-    $scope.viewStyle.style = 'map';
-    $scope.$broadcast('selectmapdata', venue);
-  };
-};
-
 angular.module('concert-search')
 
-.controller('EventsCtrl', ['eventsList', function (eventsList) {
-  this.events = eventsList.events;
-}])
+.controller('EventsCtrl', [
+  '$scope', 'eventsList', 'mapPosition',
+  function ($scope, eventsList, mapPosition) {
+    this.events = eventsList.events;
+    this.viewStyle = {
+      style: 'map'
+    };
+    var self = this;
+    mapPosition.on('change', function () {
+      self.viewStyle.style = 'map';
+    });
+  }
+])
 
 .controller('VenuesCtrl', [
-  '$scope', 'venuesList', 'uiMap',
-  function ($scope, venuesList, uiMap) {
+  '$scope', 'venuesList', 'jumpToMap', 'mapPosition',
+  function ($scope, venuesList, jumpToMap, mapPosition) {
     this.venues = venuesList.venues;
-    this.jumpToMap = makeJumpToMapFn($scope);
+    this.viewStyle = {
+      style: 'map'
+    };
+    var self = this;
+    mapPosition.on('change', function () {
+      self.viewStyle.style = 'map';
+    });
+    this.jumpToMap = jumpToMap;
   }
 ])
 
 .controller('VenueEventsCtrl', [
-  'venuesList', '$stateParams',
-  function (venuesList, $stateParams) {
+  '$scope', 'venuesList', 'jumpToMap', '$stateParams',
+  function ($scope, venuesList, jumpToMap, $stateParams) {
     this.venue = venuesList.getCanonicalVenue({id: $stateParams.venueId });
     this.events = this.venue.events;
-    this.jumpToMap = makeJumpToMapFn($scope);
+    this.jumpToMap = jumpToMap;
   }
 ])
 

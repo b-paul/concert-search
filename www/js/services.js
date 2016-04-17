@@ -327,6 +327,15 @@ angular.module('concert-search')
   };
 })
 
+.factory('jumpToMap', ['mapPosition', function (mapPosition) {
+  return function (venue) {
+    mapPosition.info = venue;
+    mapPosition.latitude = venue.latitude;
+    mapPosition.longitude = venue.longitude;
+    mapPosition.emit('change');
+  };
+}])
+
 .factory('makeEventEmitter', ['$timeout', function ($timeout) {
   return function (obj) {
     var subs = {};

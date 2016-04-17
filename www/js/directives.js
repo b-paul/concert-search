@@ -122,11 +122,9 @@ angular.module('concert-search')
                  + 'ng-model="viewStyle.style">'
         + '</label>'
       + '</form>',
-    controller: ['$scope', function ($scope) {
-      $scope.viewStyle = {
-        style: 'map'
-      };
-    }]
+    scope: {
+      viewStyle: '='
+    }
   };
 })
 

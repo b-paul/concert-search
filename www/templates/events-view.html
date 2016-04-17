@@ -1,12 +1,13 @@
 <ion-view>
-  <div ng-if="viewStyle.style == 'map'">
+  <viewstyle-selector view-style="$ctrl.viewStyle"></viewstyle-selector>
+  <div ng-if="$ctrl.viewStyle.style == 'map'">
     <ion-content scroll="false">
       <map-view map-data="$ctrl.events">
         <event-view event="selectedMapData"></event-view>
       </map-view>
     </ion-content>
   </div>
-  <div ng-if="viewStyle.style == 'list'">
+  <div ng-if="$ctrl.viewStyle.style == 'list'">
     <ion-content>
       <ion-list>
         <ion-item ng-repeat="event in $ctrl.events">
