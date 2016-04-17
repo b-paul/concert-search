@@ -1,6 +1,6 @@
 <ion-view>
   <ion-content>
-    <venue-view venue="$ctrl.venue" on-inspect="$ctrl.jumpToMap(venue)">
+    <venue-view venue="$ctrl.venue" on-inspect="$ctrl.jumpToMap($ctrl.venue)">
     </venue-view>
     <ion-list>
       <ion-item ng-repeat="event in $ctrl.events">
