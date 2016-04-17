@@ -269,7 +269,6 @@ angular.module('concert-search')
   return {
     save: function (key, value) {
       store[key] = value;
-      console.log(store);
       localStorage.setItem(APPID, JSON.stringify(store));
     },
     get: function (key) {
