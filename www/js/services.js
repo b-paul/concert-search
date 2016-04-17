@@ -21,126 +21,44 @@ angular.module('concert-search')
   return maps;
 }])
 
-.factory('uiMap', ['maps', function (maps) {
-  var selection;
-  // var mapNode = angular.element('<div />').css({ height: '100%' });
-  // var map = new maps.Map(mapNode[0], {
-  //   center: new maps.LatLng(32.756784, -97.070123),
-  //   zoom: 13,
-  //   mapTypeId: maps.MapTypeId.ROADMAP,
-  //   mapTypeControl: false,
-  //   streetViewControl: false
-  // });
-  var map;
-  // var infoWindow = new maps.InfoWindow();
-  // var markers = [];
-  // var markersDict = {};
-  // var listeners = [];
-
-  // var getKey = function (data) {
-  //   return data.id;
-  // };
-
-  // var checkWindow = function () {
-  //   if (!selection) { return; }
-  //   var dataKey = getKey(selection);
-  //   var mrk = markers[dataKey];
-  //   if (mrk && selection) {
-  //     setTimeout(function () {
-  //       infoWindow.open(map, mrk);
-  //     }, 0);
-  //   } else {
-  //     infoWindow.close();
-  //   }
-  // };
-
-  return {
-    // getMapNode: function () {
-    //   return mapNode;
-    // },
-    setMap: function (m) {
-      map = m;
-    },
-    getMap: function () {
-      return map;
-    },
-    // setInfoWindowContent: function (content, scope, scopeProperty) {
-    //   infoWindow.setContent(content);
-    //   if (scope && scopeProperty) {
-    //     scope[scopeProperty] = selection;
-    //   }
-    //   checkWindow();
-    // },
-    // setData: function (data) {
-    //   markers.forEach(function (m) {
-    //     m.setMap(null);
-    //   });
-    //   markersDict = {};
-    //   markers = data.map(function (d) {
-    //     var dataKey = getKey(d);
-    //     var mrk = new maps.Marker({
-    //       position: new maps.LatLng(d.latitude, d.longitude),
-    //       title: d.title
-    //     });
-    //     markersDict[dataKey] = mrk;
-    //     mrk.setMap(map);
-    //     return mrk;
-    //   });
-    //   checkWindow();
-    // },
-    // setSelection: function (data) {
-    //   selection = data || selection;
-    //   data && listeners.forEach(function (l) {
-    //     l(data);
-    //   });
-    //   checkWindow();
-    // },
-    // onSelect: function (listener) {
-    //   listeners.push(listener);
-    // },
-    // offSelect: function (listener) {
-    //   listeners = listeners.filter(function (l) { return l !== listener; });
-    // }
-  }
+.factory('mapPosition', ['makeEventEmitter', function (makeEventEmitter) {
+  return makeEventEmitter({
+    latitude: 32.756784,
+    longitude: -97.070123,
+    zoom: 13,
+    radius: 5
+  });
 }])
 
 .factory('eventsList', [
-  'APPID', '$http', 'uiMap',
-  function (APPID, $http, uiMap) {
+  'APPID', '$http', 'mapPosition',
+  function (APPID, $http, mapPosition) {
     var events = [];
 
-    var map;
-    var eventsLoaded;
-    var clear = setInterval(function () {
-      map = uiMap.getMap();
-      if (!map) { return; }
-      var center = map.getCenter();
-      var latitude = center.lat();
-      var longitude = center.lng();
-      var radius = 5;
-      clearInterval(clear);
-      eventsLoaded = $http.jsonp(
-        '//api.bandsintown.com/events/search.json',
-        { params: {
-            location: latitude + ',' + longitude,
-            radius: radius,
-            callback: 'JSON_CALLBACK',
-            app_id: APPID
-          } }
-      );
+    var latitude = mapPosition.latitude;
+    var longitude = mapPosition.longitude;
+    var location = latitude + ',' + longitude;
+    var eventsLoaded = $http.jsonp(
+      '//api.bandsintown.com/events/search.json',
+      { params: {
+          location: location,
+          radius: mapPosition.radius,
+          callback: 'JSON_CALLBACK',
+          app_id: APPID
+        } }
+    );
 
-      eventsLoaded
-        .then(function (res) {
-          if (res.data.errors) {
-            throw new Error(res.data.errors[0]);
-          }
-          [].push.apply(events, res.data.map(processEvent));
-        })
-        .catch(function (err) {
-          console.error('An error occurred while loading events list.');
-          console.error(err);
-        });
-    }, 100);
+    eventsLoaded
+      .then(function (res) {
+        if (res.data.errors) {
+          throw new Error(res.data.errors[0]);
+        }
+        [].push.apply(events, res.data.map(processEvent));
+      })
+      .catch(function (err) {
+        console.error('An error occurred while loading events list.');
+        console.error(err);
+      });
 
 
     return {
@@ -407,7 +325,41 @@ angular.module('concert-search')
       if (callNow) func.apply(context, args);
     };
   };
-});
+})
+
+.factory('makeEventEmitter', ['$timeout', function ($timeout) {
+  return function (obj) {
+    var subs = {};
+    getSubs = function (eventName) { return subs[eventName] || []; };
+
+    obj.on = function (eventName, f) {
+      subs[eventName] = getSubs(eventName).concat(f);
+    };
+
+    obj.off = function (eventName, f) {
+      subs[eventName] = getSubs(eventName).filter(function (_f_) {
+        return _f_ !== f;
+      });
+    };
+
+    obj.one = function (eventName, f) {
+      var self = this;
+      return self.on(eventName, function subscriber() {
+        f.apply(null, arguments);
+        self.off(eventName, subscriber);
+      });
+    };
+
+    obj.emit = function (eventName) {
+      var args = [].slice.call(arguments, 1);
+      getSubs(eventName).forEach(function (f) {
+        $timeout(function () { f.apply(null, args); }, 0);
+      });
+    };
+
+    return obj;
+  };
+}]);
 
 var processEvent = function (eventData) {
   eventData.latitude = eventData.venue.latitude;

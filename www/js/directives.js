@@ -130,98 +130,134 @@ angular.module('concert-search')
   };
 })
 
-.directive('mapView', ['maps', 'uiMap', '$window', function(maps, uiMap, $window) {
-  var doc = $window.document;
-  return {
-    restrict: 'E',
-    scope: {
-      mapData: '=',
-    },
-    transclude: true,
-    link: function ($scope, $element, $attr, $ctrl, $transclude) {
-      var map, infoWindow, infoScope, info;
+.directive('mapView', [
+  'maps', 'mapPosition', 'debounce', '$window', '$rootScope',
+  function(maps, mapPosition, debounce, $window, $rootScope) {
+    var doc = $window.document;
+    return {
+      restrict: 'E',
+      scope: {
+        mapData: '=',
+      },
+      transclude: true,
+      link: function ($scope, $element, $attr, $ctrl, $transclude) {
+        var map, infoWindow, infoScope;
 
-      var firstElement = function ($dom) {
-        for (var i = 0, l = $dom.length; i < l; i++) {
-          if ($dom[i] instanceof HTMLElement) {
-            return $dom[i];
+        var firstElement = function ($dom) {
+          for (var i = 0, l = $dom.length; i < l; i++) {
+            if ($dom[i] instanceof HTMLElement) {
+              return $dom[i];
+            }
           }
-        }
-      };
+        };
 
-      // Access the transcluded element(s) and scope
-      $transclude(function (tClone, tScope) {
-        var elt = firstElement(tClone);
-        infoWindow = new maps.InfoWindow({
-          content: elt
-        });
-        infoScope = tScope;
-      });
-
-      var markers = [];
-      var markersDict = {};
-
-      var getKey = function (data) {
-        return data.id;
-      };
-
-      var showInfo = function (data) {
-        console.log(data);
-        console.log(infoWindow);
-        info = data;
-        var dataKey = getKey(info);
-        var marker = markersDict[dataKey];
-        if (!info || !marker) {
-          info = null;
-          return infoWindow.close();
-        }
-        infoScope.$apply(function () {
-          infoScope.selectedMapData = info;
-          infoWindow.open(map, marker);
-        });
-      };
-
-      $scope.$on('selectmapdata', function (evt, data) {
-        console.log('here');
-        map.setCenter(new maps.LatLng(data.latitude, data.longitude));
-        showInfo(data);
-      });
-
-      var setMarkers = function () {
-        markers.forEach(function (marker) { marker.setMap(null); });
-        markersDict = {};
-        markers = $scope.mapData.map(function (data) {
-          var dataKey = getKey(data);
-          var marker = new maps.Marker({
-            position: new maps.LatLng(data.latitude, data.longitude),
-            title: data.title
+        // Access the transcluded element(s) and scope
+        $transclude(function (tClone, tScope) {
+          var elt = firstElement(tClone);
+          infoWindow = new maps.InfoWindow({
+            content: elt
           });
-          marker.setMap(map);
-          markersDict[dataKey] = marker;
-          marker.addListener('click', function () { showInfo(data); });
-          return marker;
+          infoScope = tScope;
         });
-        info && showInfo(info);
-      };
 
-      var initialize = function () {
-        map = new maps.Map(firstElement($element), {
-          center: new maps.LatLng(32.756784, -97.070123),
-          zoom: 13,
-          mapTypeId: maps.MapTypeId.ROADMAP,
-          mapTypeControl: false,
-          streetViewControl: false
-        });
-        uiMap.setMap(map);
+        var markers = [];
+        var markersDict = {};
 
-        $scope.$watchCollection('mapData', setMarkers);
-      };
+        var getKey = function (data) {
+          return data.id;
+        };
 
-      if (doc.readyState === "complete") {
-        initialize();
-      } else {
-        maps.event.addDomListener($window, 'load', initialize);
+        var lastInfoWindow;
+        var lastMarker;
+        var showInfo = function (data) {
+          mapPosition.info = data;
+          var dataKey = getKey(data);
+          var marker = markersDict[dataKey];
+          if (!data || !marker) {
+            mapPosition.info = null;
+            return infoWindow.close();
+          }
+          infoScope.selectedMapData = data;
+          infoWindow.open(map, marker);
+        };
+
+        var setMarkers = function () {
+          markers.forEach(function (marker) { marker.setMap(null); });
+          markersDict = {};
+          markers = $scope.mapData.map(function (data) {
+            var dataKey = getKey(data);
+            var marker = new maps.Marker({
+              position: new maps.LatLng(data.latitude, data.longitude),
+              title: data.title
+            });
+            marker.setMap(map);
+            markersDict[dataKey] = marker;
+            marker.addListener('click', function () {
+              $scope.$apply(showInfo.bind(null, data));
+            });
+            return marker;
+          });
+          mapPosition.info && showInfo(mapPosition.info);
+        };
+
+        var initialize = function () {
+          var latitude = mapPosition.latitude;
+          var longitude = mapPosition.longitude;
+          map = new maps.Map(firstElement($element), {
+            center: new maps.LatLng(latitude, longitude),
+            zoom: mapPosition.zoom,
+            mapTypeId: maps.MapTypeId.ROADMAP,
+            mapTypeControl: false,
+            streetViewControl: false
+          });
+
+          $scope.$watchCollection('mapData', setMarkers);
+
+
+          map.addListener('center_changed', function () {
+            var center = map.getCenter();
+            mapPosition.latitude = center.lat();
+            mapPosition.longitude = center.lng();
+
+            mapPosition.emit('change');
+          });
+
+          map.addListener('zoom_changed', function () {
+            mapPosition.zoom = map.getZoom();
+
+            mapPosition.emit('change');
+          });
+
+          mapPosition.on('change', debounce(function () {
+            var latitude = mapPosition.latitude;
+            var longitude = mapPosition.longitude;
+            var zoom = mapPosition.zoom;
+
+            var currentCenter = map.getCenter();
+            var currentLat = currentCenter.lat();
+            var currentLng = currentCenter.lng();
+            var currentZoom = map.getZoom();
+
+            var positionChange
+              = currentLat !== latitude
+              || currentLng !== longitude
+              || currentZoom !== zoom;
+
+            if (positionChange) {
+              map.setCenter(new maps.LatLng(latitude, longitude));
+              map.setZoom(mapPosition.zoom);
+            }
+
+            mapPosition.info && showInfo(mapPosition.info);
+          }));
+        };
+
+        if (doc.readyState === "complete") {
+          initialize();
+        } else {
+          maps.event.addDomListener($window, 'load', initialize);
+        }
       }
     }
   }
-}]);
+]);
