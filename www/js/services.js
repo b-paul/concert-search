@@ -291,7 +291,7 @@ angular.module('concert-search')
     self.addTask = function (task) {
       if (taskTimer) {
         return taskTimer.then(function () {
-          self.addTask(task);
+          return self.addTask(task);
         });
       } else if (tasksOut >= self.taskBandwidth) {
         var deferredTask = $q.defer();
