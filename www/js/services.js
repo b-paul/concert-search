@@ -44,6 +44,7 @@ angular.module('concert-search')
           location: location,
           radius: mapPosition.radius,
           callback: 'JSON_CALLBACK',
+          per_page: 3,
           app_id: APPID
         } }
     );

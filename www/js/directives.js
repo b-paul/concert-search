@@ -142,23 +142,6 @@ angular.module('concert-search')
       link: function ($scope, $element, $attr, $ctrl, $transclude) {
         var map, infoWindow, infoScope;
 
-        var firstElement = function ($dom) {
-          for (var i = 0, l = $dom.length; i < l; i++) {
-            if ($dom[i] instanceof HTMLElement) {
-              return $dom[i];
-            }
-          }
-        };
-
-        // Access the transcluded element(s) and scope
-        $transclude(function (tClone, tScope) {
-          var elt = firstElement(tClone);
-          infoWindow = new maps.InfoWindow({
-            content: elt
-          });
-          infoScope = tScope;
-        });
-
         var markers = [];
         var markersDict = {};
 
@@ -176,6 +159,10 @@ angular.module('concert-search')
           }
           infoScope.selectedMapData = data;
           infoWindow.open(map, marker);
+        };
+
+        var unshowInfo = function (data) {
+          mapPosition.info = null;
         };
 
         var setMarkers = function () {
@@ -248,6 +235,24 @@ angular.module('concert-search')
             mapPosition.info && showInfo(mapPosition.info);
           }));
         };
+
+        var firstElement = function ($dom) {
+          for (var i = 0, l = $dom.length; i < l; i++) {
+            if ($dom[i] instanceof HTMLElement) {
+              return $dom[i];
+            }
+          }
+        };
+
+        // Access the transcluded element(s) and scope
+        $transclude(function (tClone, tScope) {
+          var elt = firstElement(tClone);
+          infoWindow = new maps.InfoWindow({
+            content: elt
+          });
+          infoWindow.addListener('closeclick', unshowInfo);
+          infoScope = tScope;
+        });
 
         if (doc.readyState === "complete") {
           initialize();
