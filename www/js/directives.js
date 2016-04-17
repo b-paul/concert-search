@@ -114,14 +114,14 @@ angular.module('concert-search')
 .directive('viewstyleSelector', function () {
   return {
     template: ''
-      + '<div class="radiogroup">'
+      + '<form class="radiogroup">'
         + '<label ng-repeat="opt in [\'map\', \'list\']">'
           + '{{ opt }}'
           + '<input type="radio" name="style"'
                  + 'value="{{ opt }}"'
                  + 'ng-model="viewStyle.style">'
         + '</label>'
-      + '</div>',
+      + '</form>',
     controller: ['$scope', function ($scope) {
       $scope.viewStyle = {
         style: 'map'
