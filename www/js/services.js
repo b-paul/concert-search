@@ -451,7 +451,7 @@ angular.module('concert-search')
 .factory('makeEventEmitter', ['$timeout', function ($timeout) {
   return function (obj) {
     var subs = {};
-    getSubs = function (eventName) { return subs[eventName] || []; };
+    var getSubs = function (eventName) { return subs[eventName] || []; };
 
     obj.on = function (eventName, f) {
       subs[eventName] = getSubs(eventName).concat(f);
