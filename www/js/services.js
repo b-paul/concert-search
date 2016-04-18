@@ -281,38 +281,53 @@ angular.module('concert-search')
   return function ThrottledResource() {
     var self = this;
 
-    self.taskRate = 500; // Start at most 1 task per 500ms
-    var taskTimer;
+    self.taskLimit = 5; // execute the first 5 tasks immediately
+    self.taskTimeout = 2500; // after meeting taskLimit, wait 2500ms
+    var taskWatcher;
 
-    self.taskBandwidth = 5; // Up to 5 tasks in parallel
-    var tasksOut = 0;
+    var tasksOut = [];
     var pendingTasks = [];
+    var noOpTask = function () { return $q.resolve(); };
 
     self.addTask = function (task) {
-      if (taskTimer) {
-        return taskTimer.then(function () {
-          return self.addTask(task);
-        });
-      } else if (tasksOut >= self.taskBandwidth) {
-        var deferredTask = $q.defer();
-        pendingTasks.push(function () {
-          var innerResult = task();
-          deferredTask.resolve(innerResult);
-          return innerResult;
-        });
-        return deferredTask.promise;
-      } else {
-        var result = task();
-        result.finally(function () {
-          tasksOut--;
-          var next = pendingTasks.shift();
-          next && self.addTask(next);
-        });
-        tasksOut++;
-        taskTimer = $timeout(function () {
-          taskTimer = null;
-        }, self.taskRate);
+      if (tasksOut.length < self.taskLimit) {
+        if (task.cancelled) {
+          var replacementTask = pendingTasks.shift();
+          replacementTask && $timeout(function () {
+            self.addTask(replacementTask);
+          }, 0);
+
+          var fakeResult = $q.resolve();
+          fakeResult.cancelTask = function () {};
+          return  fakeResult;
+        }
+
+        var result = $q.resolve(task());
+        result.cancelTask = function () {};
+
+        tasksOut.push(result);
+        if (tasksOut.length === self.taskLimit) {
+          $q.all(tasksOut).then(function () {
+            $timeout(function () {
+              tasksOut = [];
+              pendingTasks.splice(0, self.taskLimit).forEach(function (t) {
+                self.addTask(t);
+              });
+            }, self.taskTimeout);
+          });
+        }
+
         return result;
+      } else {
+        var deferredResult = $q.defer();
+        var deferredTask = function () {
+          return deferredResult.resolve(task());
+        };
+        pendingTasks.push(deferredTask);
+        deferredResult.promise.cancelTask = function () {
+          deferredTask.cancelled = true;
+        };
+        return deferredResult.promise;
       }
     };
   };
