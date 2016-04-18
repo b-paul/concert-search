@@ -18,7 +18,7 @@
       </ion-list>
     </ion-content>
   </div>
-  <form class="floatingcontrols">
+  <form class="floatingcontrols" ng-if="$ctrl.viewStyle.style === 'map'">
     <label class="controlbutton controlbutton-expander" id="radius-input">
       Radius: {{ $ctrl.searchOptions.radius }}
       <input id="radius-input" type="range" min="1" max="150"

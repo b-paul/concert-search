@@ -1,15 +1,35 @@
 angular.module('concert-search')
 
 .controller('EventsCtrl', [
-  '$scope', 'eventsList', 'mapPosition',
-  function ($scope, eventsList, mapPosition) {
+  '$scope', 'eventsList', 'recommendedEventsList', 'mapPosition',
+  function ($scope, eventsList, recommendedEventsList, mapPosition) {
+    var installedEventsList = eventsList;
     this.events = eventsList.events;
+
     this.viewStyle = {
       style: 'map'
     };
+
     var self = this;
     mapPosition.on('change', function () {
       self.viewStyle.style = 'map';
+    });
+
+    this.searchOptions = {
+      radius: mapPosition.radius,
+      filtering: false
+    };
+    $scope.$watch('$ctrl.searchOptions.radius', function () {
+      mapPosition.radius = self.searchOptions.radius;
+      mapPosition.emit('change');
+      installedEventsList.refresh();
+    });
+
+    $scope.$watch('$ctrl.searchOptions.filtering', function () {
+      installedEventsList = self.searchOptions.filtering
+        ? recommendedEventsList
+        : eventsList;
+      self.events = installedEventsList.events;
     });
   }
 ])
@@ -36,6 +56,15 @@ angular.module('concert-search')
         venuesList.cancelOutstandingRequests();
       }
       previousViewStyle = self.viewStyle.style;
+    });
+
+    this.searchOptions = {
+      radius: mapPosition.radius
+    };
+    $scope.$watch('$ctrl.searchOptions.radius', function () {
+      mapPosition.radius = self.searchOptions.radius;
+      mapPosition.emit('change');
+      venuesList.refresh();
     });
   }
 ])
