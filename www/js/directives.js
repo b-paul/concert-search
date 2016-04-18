@@ -21,14 +21,21 @@ angular.module('concert-search')
         if ($scope.venue && $scope.venue.id !== lastVenueId) {
           lastVenueId = $scope.venue.id;
           $scope.venue = venuesList.getCanonicalVenue($scope.venue);
-          if (!$scope.venue.address) {
+          if (!$scope.venue.addressLoaded) {
             $scope.venue.address = 'loading address...';
-            venuesList.fetchAddress($scope.venue).catch(function (err) {
-              $scope.venue.address = 'Unable to load address';
-            });
+            venuesList.fetchAddress($scope.venue).then(
+              function () {
+                $scope.venue.addressLoaded = true;
+              },
+              function (err) {
+                $scope.venue.address = 'Unable to load address';
+              }
+            );
           }
-          if (!$scope.venue.events) {
-            venuesList.fetchEvents($scope.venue);
+          if (!$scope.venue.eventsLoaded) {
+            venuesList.fetchEvents($scope.venue).then(function () {
+              $scope.venue.eventsLoaded = true;
+            });
           }
           if (!('dynamic' in $attr)) {
             unwatch();

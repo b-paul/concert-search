@@ -26,6 +26,16 @@ angular.module('concert-search')
       self.viewStyle.style = 'map';
     });
     this.jumpToMap = jumpToMap;
+
+    // When the viewstyle changes from 'list' to anything else, cancel the
+    // currently-outstanding requests;
+    var previousViewStyle;
+    $scope.$watch('$ctrl.viewStyle.style', function () {
+      if (previousViewStyle === 'list' && self.viewStyle.style !== 'list') {
+        venuesList.cancelOutstandingRequests();
+      }
+      previousViewStyle = self.viewStyle.style;
+    });
   }
 ])
 

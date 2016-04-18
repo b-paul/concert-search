@@ -113,6 +113,7 @@ angular.module('concert-search')
     };
 
     var fetcher = new ThrottledResource();
+    var outstandingRequests = [];
 
     vl.fetchEvents = function (venue) {
       var eventsLoaded = $http.jsonp(
@@ -123,9 +124,16 @@ angular.module('concert-search')
           } }
       );
 
-      return eventsLoaded.then(function (res) {
+      var fetchTask = eventsLoaded.then(function (res) {
         venue.events = res.data;
+
+        outstandingRequests = outstandingRequests.filter(function (o) {
+          return o !== fetchTask;
+        });
       });
+
+      outstandingRequests.push(fetchTask);
+      return fetchTask;
     };
 
     vl.fetchAddress = function (venue) {
@@ -135,7 +143,7 @@ angular.module('concert-search')
         radius: 100
       };
 
-      return fetcher.addTask(function () {
+      var fetchTask = fetcher.addTask(function () {
         var loadProcess = $q.defer();
         // Try first with places service using both name and latitude/longitude
         places.textSearch(options, function (res, textStatus, status) {
@@ -163,6 +171,10 @@ angular.module('concert-search')
           loadProcess.resolve(match);
         });
 
+        outstandingRequests = outstandingRequests.filter(function (o) {
+          return o !== fetchTask;
+        });
+
         return loadProcess.promise.then(function (match) {
           venue.address = match.formatted_address;
           venue.rating = match.rating;
@@ -171,6 +183,20 @@ angular.module('concert-search')
           venue.longitude = match.geometry.location.lng();
           return venue;
         });
+      });
+
+      outstandingRequests.push(fetchTask);
+      return fetchTask;
+    };
+
+    vl.cancelOutstandingRequests = function () {
+      outstandingRequests.forEach(function (o) {
+        try {
+          o.cancelTask();
+        } catch (err) {
+          console.error('Error trying to cancel task', o);
+          console.error(err);
+        }
       });
     };
 
