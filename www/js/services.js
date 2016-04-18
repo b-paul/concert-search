@@ -316,32 +316,40 @@ angular.module('concert-search')
   return al;
 }])
 
-.factory('favoriteArtists', ['storage', function (storage) {
-  var favorites = storage.get('favorites') || {};
+.factory('favoriteArtists', ['storage', 'makeEventEmitter',
+  function (storage, makeEventEmitter) {
+    var favorites = storage.get('favorites') || {};
 
-  return {
-    length: Object.keys(favorites).length,
-    contains: function (id) {
-      return (id in favorites);
-    },
-    add: function (id) {
-      if (this.contains(id)) {
-        return;
+    return makeEventEmitter({
+      length: Object.keys(favorites).length,
+      contains: function (id) {
+        return (id in favorites);
+      },
+      add: function (id) {
+        if (this.contains(id)) {
+          return;
+        }
+        this.length++;
+        favorites[id] = true;
+        storage.save('favorites', favorites);
+        this.emit('change');
+      },
+      remove: function (id) {
+        this.length--;
+        delete favorites[id];
+        storage.save('favorites', favorites);
+        this.emit('change');
+      },
+      toggle: function (id) {
+        this.contains(id) ? this.remove(id) : this.add(id);
+      },
+      list: function () {
+        return Object.keys(favorites)
+          .filter(function (k) { return favorites[k]; });
       }
-      this.length++;
-      favorites[id] = true;
-      storage.save('favorites', favorites);
-    },
-    remove: function (id) {
-      this.length--;
-      delete favorites[id];
-      storage.save('favorites', favorites);
-    },
-    toggle: function (id) {
-      this.contains(id) ? this.remove(id) : this.add(id);
-    }
-  };
-}])
+    });
+  }
+])
 
 .factory('storage', ['APPID', function (APPID) {
   var store = JSON.parse(localStorage.getItem(APPID) || '{}');
