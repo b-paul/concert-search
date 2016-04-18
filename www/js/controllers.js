@@ -21,6 +21,7 @@ angular.module('concert-search')
     this.viewStyle = {
       style: 'map'
     };
+
     var self = this;
     mapPosition.on('change', function () {
       self.viewStyle.style = 'map';

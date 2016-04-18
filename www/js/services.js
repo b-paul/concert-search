@@ -30,40 +30,90 @@ angular.module('concert-search')
   });
 }])
 
-.factory('eventsList', [
-  'APPID', '$http', 'mapPosition',
-  function (APPID, $http, mapPosition) {
-    var events = [];
+.factory('EventsList', [
+  'APPID', '$http', 'debounce',
+  function (APPID, $http, debounce) {
+    return function EventsList(endpoint, getParams) {
+      var events = [];
+      var load = function () {
+        var params = getParams();
+        params.callback = 'JSON_CALLBACK';
+        params.app_id = APPID;
+        console.log(params);
 
-    var latitude = mapPosition.latitude;
-    var longitude = mapPosition.longitude;
-    var location = latitude + ',' + longitude;
-    var eventsLoaded = $http.jsonp(
+        $http.jsonp(endpoint, { params: params })
+          .then(function (res) {
+            if (res.data.errors) {
+              throw new Error(res.data.errors[0]);
+            }
+            [].splice.apply(
+              events, [0, Infinity].concat(res.data.map(processEvent))
+            );
+          })
+          .catch(function (err) {
+            console.error('An error occurred while loading events list.');
+            console.error(err);
+          });
+      };
+
+      load();
+
+      return {
+        events: events,
+        refresh: debounce(load)
+      };
+    };
+  }
+])
+
+.factory('eventsList', [
+  'EventsList', 'mapPosition',
+  function (EventsList, mapPosition) {
+    return new EventsList(
       '//api.bandsintown.com/events/search.json',
-      { params: {
+      function () {
+        var latitude = mapPosition.latitude;
+        var longitude = mapPosition.longitude;
+        var location = latitude + ',' + longitude;
+        var radius = mapPosition.radius;
+
+        return {
           location: location,
-          radius: mapPosition.radius,
-          callback: 'JSON_CALLBACK',
-          app_id: APPID
-        } }
+          radius: radius
+        };
+      }
+    );
+  }
+])
+
+.factory('recommendedEventsList', [
+  'EventsList', 'mapPosition', 'favoriteArtists',
+  function (EventsList, mapPosition, favoriteArtists) {
+    var recs = new EventsList(
+      '//api.bandsintown.com/events/recommended.json',
+      function () {
+        var latitude = mapPosition.latitude;
+        var longitude = mapPosition.longitude;
+        var location = latitude + ',' + longitude;
+        var radius = mapPosition.radius;
+
+        var artists = favoriteArtists.list().map(function (mbid) {
+          return 'mbid_' + mbid;
+        });
+
+        return {
+          location: location,
+          radius: radius,
+          'artists[]': artists
+        };
+      }
     );
 
-    eventsLoaded
-      .then(function (res) {
-        if (res.data.errors) {
-          throw new Error(res.data.errors[0]);
-        }
-        [].push.apply(events, res.data.map(processEvent));
-      })
-      .catch(function (err) {
-        console.error('An error occurred while loading events list.');
-        console.error(err);
-      });
+    favoriteArtists.on('change', function () {
+      recs.refresh();
+    });
 
-
-    return {
-      events: events
-    };
+    return recs;
   }
 ])
 
@@ -198,6 +248,10 @@ angular.module('concert-search')
           console.error(err);
         }
       });
+    };
+
+    vl.refresh = function () {
+      eventsList.refresh();
     };
 
     return vl;
