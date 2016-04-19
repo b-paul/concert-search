@@ -10,6 +10,10 @@ angular.module('concert-search')
       style: 'map'
     };
 
+    this.refresh = function () {
+      installedEventsList.refresh();
+    };
+
     var self = this;
     mapPosition.on('change', function () {
       self.viewStyle.style = 'map';
@@ -40,6 +44,10 @@ angular.module('concert-search')
     this.venues = venuesList.venues;
     this.viewStyle = {
       style: 'map'
+    };
+
+    this.refresh = function () {
+      installedEventsList.refresh();
     };
 
     var self = this;

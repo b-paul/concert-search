@@ -26,7 +26,7 @@
     <label class="controlbutton" id="filtering-checkbox">
       Showing:
       <span ng-if="$ctrl.searchOptions.filtering">
-        favorite artists only
+        favorites &amp; recommended
       </span>
       <span ng-if="!$ctrl.searchOptions.filtering">
         all artists
@@ -34,5 +34,6 @@
       <input id="filtering-checkbox" type="checkbox" name="filtering"
              ng-model="$ctrl.searchOptions.filtering">
     </label>
+    <button ng-click="$ctrl.refresh()">Refresh</button>
   </form>
 </ion-view>

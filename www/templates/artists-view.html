@@ -1,7 +1,10 @@
 <ion-view>
   <ion-content>
-    <input type="text" ng-model="$ctrl.artistFilter"
-           ng-change="$ctrl.filterArtists()">
+    <form>
+      <input type="text" ng-model="$ctrl.artistFilter"
+             ng-change="$ctrl.filterArtists()">
+      <button ng-click="$ctrl.filterArtists()">Search</button>
+    </form>
     <ion-list>
       <ion-item ng-repeat="artist in $ctrl.artists">
         <artist-view artist="artist" favorite="$ctrl.isFavorite(artist)">
