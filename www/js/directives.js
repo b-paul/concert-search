@@ -137,9 +137,8 @@ angular.module('concert-search')
 })
 
 .directive('mapView', [
-  'maps', 'mapPosition', 'debounce', '$window', '$rootScope',
-  function(maps, mapPosition, debounce, $window, $rootScope) {
-    var doc = $window.document;
+  'maps', 'mapPosition', 'debounce',
+  function(maps, mapPosition, debounce) {
     return {
       restrict: 'E',
       scope: {
@@ -261,11 +260,7 @@ angular.module('concert-search')
           infoScope = tScope;
         });
 
-        if (doc.readyState === "complete") {
-          initialize();
-        } else {
-          maps.event.addDomListener($window, 'load', initialize);
-        }
+        $scope.$on('mapreload', initialize);
       }
     }
   }
