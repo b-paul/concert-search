@@ -327,6 +327,11 @@ angular.module('concert-search')
       add: function (id) {
         if (this.contains(id)) {
           return;
+        } else if (this.length >= 50) {
+          // BandsInTown API limitation
+          throw new Error(
+            'Cannot have more than 50 favorites selected at this time'
+          );
         }
         this.length++;
         favorites[id] = true;
