@@ -39,7 +39,6 @@ angular.module('concert-search')
         var params = getParams();
         params.callback = 'JSON_CALLBACK';
         params.app_id = APPID;
-        console.log(params);
 
         $http.jsonp(endpoint, { params: params })
           .then(function (res) {
