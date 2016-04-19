@@ -35,10 +35,6 @@ angular.module('concert-search')
         : eventsList;
       self.events = installedEventsList.events;
     });
-
-    $scope.$on('$ionicView.enter', function () {
-      $scope.$broadcast('mapreload');
-    });
   }
 ])
 
@@ -77,10 +73,6 @@ angular.module('concert-search')
       mapPosition.radius = self.searchOptions.radius;
       mapPosition.emit('change');
       venuesList.refresh();
-    });
-
-    $scope.$on('$ionicView.enter', function () {
-      $scope.$broadcast('mapreload');
     });
   }
 ])
