@@ -1,14 +1,12 @@
 <ion-view>
-  <viewstyle-selector id="events-viewstyle" view-style="$ctrl.viewStyle">
-  </viewstyle-selector>
-  <div ng-if="$ctrl.viewStyle.style == 'map'">
+  <div ng-if="$ctrl.viewStyle.style == 'Map'">
     <ion-content scroll="false">
       <map-view map-data="$ctrl.events">
         <event-view event="selectedMapData"></event-view>
       </map-view>
     </ion-content>
   </div>
-  <div ng-if="$ctrl.viewStyle.style == 'list'">
+  <div ng-if="$ctrl.viewStyle.style == 'List'">
     <ion-content>
       <ion-list>
         <ion-item ng-repeat="event in $ctrl.events">
@@ -17,23 +15,37 @@
       </ion-list>
     </ion-content>
   </div>
-  <form class="floatingcontrols" ng-if="$ctrl.viewStyle.style === 'map'">
-    <label class="controlbutton controlbutton-expander" id="radius-input">
-      Radius: {{ $ctrl.searchOptions.radius }}
-      <input id="radius-input" type="range" min="1" max="150"
-             ng-model="$ctrl.searchOptions.radius">
+  <div class="mapcontrols">
+    <div class="maincontrols">
+      <viewstyle-selector id="events-viewstyle" view-style="$ctrl.viewStyle">
+      </viewstyle-selector>
+    </div>
+    <label for="events-show-auxcontrols-input"
+           ng-show="$ctrl.viewStyle.style === 'Map'"    
+           class="icon ion-gear-b show-auxcontrols">
     </label>
-    <label class="controlbutton" id="filtering-checkbox">
-      Showing:
-      <span ng-if="$ctrl.searchOptions.filtering">
-        favorites &amp; recommended
-      </span>
-      <span ng-if="!$ctrl.searchOptions.filtering">
-        all artists
-      </span>
-      <input id="filtering-checkbox" type="checkbox" name="filtering"
-             ng-model="$ctrl.searchOptions.filtering">
-    </label>
-    <button ng-click="$ctrl.refresh()">Refresh</button>
-  </form>
+    <input type="checkbox" class="hiddeninput show-auxcontrols-input"
+           id="events-show-auxcontrols-input">
+    <form class="auxcontrols" ng-show="$ctrl.viewStyle.style === 'Map'">
+      <label class="controlsegment" id="radius-input">
+        Radius: {{ $ctrl.searchOptions.radius }}
+        <input id="radius-input" type="range" min="1" max="150"
+               ng-model="$ctrl.searchOptions.radius">
+      </label>
+      <label class="controlsegment" id="filtering-checkbox">
+        Showing:
+        <span ng-if="$ctrl.searchOptions.filtering">
+          favorites &amp; recommended
+        </span>
+        <span ng-if="!$ctrl.searchOptions.filtering">
+          all artists
+        </span>
+        <input id="filtering-checkbox" type="checkbox" name="filtering"
+               class="hiddeninput" ng-model="$ctrl.searchOptions.filtering">
+      </label>
+      <div class="controlsegment">
+        <button ng-click="$ctrl.refresh()">Refresh</button>
+      </div>
+    </form>
+  </div>
 </ion-view>

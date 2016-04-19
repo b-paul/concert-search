@@ -3,14 +3,16 @@ angular.module('concert-search')
 .directive('venueView', ['venuesList', function (venuesList) {
   return {
     template: ''
-      + '<h4>{{ venue.name }}</h4>'
-      + '<two-line-address address="venue.address" on-inspect="onInspect()">'
-      + '</two-line-address>'
-      + '<p ng-if="venue.rating">Average rating: {{ venue.rating }}</p>'
-      + '<p ng-bind-html="venue.attrib"></p>'
-      + '<a ng-href="#/app/venues/{{ venue.id }}/events">'
-        + '{{ venue.events.length }} upcoming events'
-      + '</a>',
+      + '<div class="summaryview">'
+        + '<h4>{{ venue.name }}</h4>'
+        + '<two-line-address address="venue.address" on-inspect="onInspect()">'
+        + '</two-line-address>'
+        + '<p ng-if="venue.rating">Average rating: {{ venue.rating }}</p>'
+        + '<p ng-bind-html="venue.attrib"></p>'
+        + '<a ng-href="#/app/venues/{{ venue.id }}/events">'
+          + '{{ venue.events.length }} upcoming events'
+        + '</a>'
+      + '</div>',
     scope: {
       venue: '=',
       onInspect: '&'
@@ -49,11 +51,13 @@ angular.module('concert-search')
 .directive('eventView', function () {
   return {
     template: ''
-      + '<h4>{{ event | eventArtistNames }}</h4>'
-      + '<p>{{ event.datetime | date:"EEE, MMM d, yyyy" }}</p>'
-      + '<p>{{ event.datetime | date:"h:mm a" }}</p>'
-      + '<h5>{{ event.venue.name }}</h5>'
-      + '<a target="_blank" ng-href="{{ event.ticket_url }}">Get tickets</a>',
+      + '<div class="summaryview">'
+        + '<h4>{{ event | eventArtistNames }}</h4>'
+        + '<p>{{ event.datetime | date:"EEE, MMM d, yyyy" }}</p>'
+        + '<p>{{ event.datetime | date:"h:mm a" }}</p>'
+        + '<h5>{{ event.venue.name }}</h5>'
+        + '<a target="_blank" ng-href="{{ event.ticket_url }}">Get tickets</a>'
+      + '</div>',
     scope: {
       event: '='
     }
@@ -63,12 +67,12 @@ angular.module('concert-search')
 .directive('artistView', function () {
   return {
     template: ''
-      + '<h4 ng-click="$ctrl.toggleFavorite($ctrl.artist)">'
-        + '{{ $ctrl.artist.name }}'
-        + '<img ng-src="{{'
-          + "'/img/svg/star-' + $ctrl.starType($ctrl.artist) + '.svg'"
-        + '}}">'
-      + '</h4>',
+      + '<div class="summaryview">'
+        + '<h4 ng-click="$ctrl.toggleFavorite($ctrl.artist)">'
+          + '{{ $ctrl.artist.name }}'
+          + '<i class="favoritestar" ng-class="$ctrl.starType($ctrl.artist)">'
+        + '</h4>'
+      + '</div>',
     scope: {
       artist: '='
     },
@@ -76,7 +80,9 @@ angular.module('concert-search')
     bindToController: true,
     controller: ['favoriteArtists', function (favoriteArtists) {
       this.starType = function (artist) {
-        return favoriteArtists.contains(artist.id) ? 'full' : 'empty';
+        return favoriteArtists.contains(artist.id)
+          ? 'ion-star'
+          : 'ion-android-star-outline';
       };
 
       this.toggleFavorite = function (artist) {
@@ -121,13 +127,15 @@ angular.module('concert-search')
 .directive('viewstyleSelector', function () {
   return {
     template: ''
-      + '<form class="radiogroup">'
-        + '<label for="{{ id }}" ng-repeat="opt in [\'map\', \'list\']">'
-          + '{{ opt }}'
-          + '<input type="radio" name="style" id="{{ id }}"'
-                 + 'value="{{ opt }}"'
+      + '<form>'
+        + '<span ng-repeat="opt in [\'Map\', \'List\']">'
+          + '<input type="radio" name="style" value="{{ opt }}"'
+                 + 'class="hiddeninput" id="{{ id + opt }}"'
                  + 'ng-model="viewStyle.style">'
-        + '</label>'
+          + '<label for="{{ id + opt }}">'
+            + '{{ opt }}'
+          + '</label>'
+        + '</span>'
       + '</form>',
     scope: {
       id: '@',
@@ -137,8 +145,8 @@ angular.module('concert-search')
 })
 
 .directive('mapView', [
-  'maps', 'mapPosition', 'debounce', '$window', '$rootScope',
-  function(maps, mapPosition, debounce, $window, $rootScope) {
+  'MARKER_ICON', 'maps', 'mapPosition', 'debounce', '$window',
+  function(MARKER_ICON, maps, mapPosition, debounce, $window) {
     var doc = $window.document;
     return {
       restrict: 'E',
@@ -179,7 +187,8 @@ angular.module('concert-search')
             var dataKey = getKey(data);
             var marker = new maps.Marker({
               position: new maps.LatLng(data.latitude, data.longitude),
-              title: data.title
+              title: data.title,
+              icon: MARKER_ICON
             });
             marker.setMap(map);
             markersDict[dataKey] = marker;

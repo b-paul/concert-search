@@ -7,7 +7,7 @@ angular.module('concert-search')
     this.events = eventsList.events;
 
     this.viewStyle = {
-      style: 'map'
+      style: 'Map'
     };
 
     this.refresh = function () {
@@ -16,7 +16,7 @@ angular.module('concert-search')
 
     var self = this;
     mapPosition.on('change', function () {
-      self.viewStyle.style = 'map';
+      self.viewStyle.style = 'Map';
     });
 
     this.searchOptions = {
@@ -43,16 +43,16 @@ angular.module('concert-search')
   function ($scope, venuesList, jumpToMap, mapPosition) {
     this.venues = venuesList.venues;
     this.viewStyle = {
-      style: 'map'
+      style: 'Map'
     };
 
     this.refresh = function () {
-      installedEventsList.refresh();
+      venuesList.refresh();
     };
 
     var self = this;
     mapPosition.on('change', function () {
-      self.viewStyle.style = 'map';
+      self.viewStyle.style = 'Map';
     });
     this.jumpToMap = jumpToMap;
 

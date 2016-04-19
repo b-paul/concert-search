@@ -1,0 +1,160 @@
+/*
+To customize the look and feel of Ionic, you can override the variables
+in ionic's _variables.scss file.
+
+For example, you might change some of the default colors:
+
+$light:                           #fff !default;
+$stable:                          #f8f8f8 !default;
+$positive:                        #387ef5 !default;
+$calm:                            #11c1f3 !default;
+$balanced:                        #33cd5f !default;
+$energized:                       #ffc900 !default;
+$assertive:                       #ef473a !default;
+$royal:                           #886aea !default;
+$dark:                            #444 !default;
+*/
+
+$balanced: #30ea28;
+$balanced2: #04af04;
+$energized: #ff499f;
+$field: linear-gradient(0deg, $balanced2, $balanced);
+
+// The path for our ionicons font files, relative to the built CSS in www/css
+$ionicons-font-path: "../lib/ionic/fonts" !default;
+
+// Include all of Ionic
+@import "www/lib/ionic/scss/ionic";
+
+a, a:hover, a:active, a:visited {
+  text-decoration: none;
+  color: $energized;
+}
+
+.tabs {
+  background: $field;
+  color: $light;
+  border: none;
+}
+
+.tab-item {
+  font-size: 110%;
+}
+
+.tab-item.tab-item-active {
+  font-weight: bold;
+}
+
+ion-view {
+  position: relative;
+  color: $light;
+}
+
+map-view {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+ion-content.has-tabs {
+  bottom: 85px;
+}
+
+.scroll {
+  height: 100%;
+}
+
+.hiddeninput {
+  clip: rect(0 0 0 0);
+  overflow: hidden;
+  position: absolute;
+}
+
+.mapcontrols {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: $tabs-height;
+  background-color: $balanced;
+  padding: 0 1.5rem;
+  z-index: 5;
+
+  .maincontrols {
+    border-bottom: 1.8px solid rgba(255, 255, 255, 0.7);
+    z-index: 5;
+  }
+
+  .auxcontrols {
+    display: none;
+    position: absolute;
+    left: 0;
+    bottom: 36px;
+    z-index: 4;
+    height: 36px;
+    width: 100%;
+    background-color: $balanced2;
+  }
+
+  .show-auxcontrols {
+    position: absolute;
+    top: 0.1rem;
+    right: 2rem;
+    font-size: 160%;
+  }
+
+  .show-auxcontrols-input:checked + .auxcontrols {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .controlsegment {
+    /* as a flex item... */
+    flex: 1;
+    min-width: 10rem;
+    padding: 0.5rem 1rem;
+
+    /* as a flex container... */
+    display: flex;
+    justify-content: center;
+    
+    input[type=range] {
+      margin: 0 0.5rem;
+      flex: 1;
+    }
+
+    button {
+      margin: 0 auto;
+    }
+  }
+}
+
+viewstyle-selector {
+  text-align: center;
+
+  label {
+    font-size: 110%;
+    display: inline-block;
+    line-height: 19px;
+    padding: 8px 3rem;
+    opacity: 0.7;
+  }
+
+  input:checked + label {
+    font-weight: bold;
+    opacity: 1;
+  }
+}
+
+.tabs .tab-item .badge {
+  @extend .icon;
+  @extend .ion-star;
+  font-size: 90%;
+  height: auto;
+  right: auto;
+  top: 25%;
+  left: 70%;
+}
+
+.summaryview {
+  color: $dark;
+}
