@@ -37,6 +37,11 @@ angular.module('concert-search')
       var events = [];
       var load = function () {
         var params = getParams();
+        if (!params) {
+          // getParams() may return a falsy value to signal there is no point in
+          // fetching events right now.
+          return;
+        }
         params.callback = 'JSON_CALLBACK';
         params.app_id = APPID;
 
@@ -99,6 +104,10 @@ angular.module('concert-search')
         var artists = favoriteArtists.list().map(function (mbid) {
           return 'mbid_' + mbid;
         });
+
+        if (!artists.length) {
+          return;
+        }
 
         return {
           location: location,
