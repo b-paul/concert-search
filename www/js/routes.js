@@ -13,7 +13,7 @@ angular.module('concert-search')
     url: '/events',
     views: {
       'events-view': {
-        templateUrl: '/templates/events-view.html',
+        templateUrl: 'templates/events-view.html',
         controller: 'EventsCtrl',
         controllerAs: '$ctrl'
       }
@@ -24,7 +24,7 @@ angular.module('concert-search')
     url: '/venues',
     views: {
       'venues-view': {
-        templateUrl: '/templates/venues-view.html',
+        templateUrl: 'templates/venues-view.html',
         controller: 'VenuesCtrl',
         controllerAs: '$ctrl'
       }
@@ -35,7 +35,7 @@ angular.module('concert-search')
     url: '/venues/:venueId/events',
     views: {
       'venues-view': {
-        templateUrl: '/templates/venue-events-view.html',
+        templateUrl: 'templates/venue-events-view.html',
         controller: 'VenueEventsCtrl',
         controllerAs: '$ctrl'
       }
