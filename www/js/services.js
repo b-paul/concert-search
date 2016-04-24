@@ -74,7 +74,7 @@ angular.module('concert-search')
   'EventsList', 'mapPosition',
   function (EventsList, mapPosition) {
     return new EventsList(
-      '//api.bandsintown.com/events/search.json',
+      'https://api.bandsintown.com/events/search.json',
       function () {
         var latitude = mapPosition.latitude;
         var longitude = mapPosition.longitude;
@@ -94,7 +94,7 @@ angular.module('concert-search')
   'EventsList', 'mapPosition', 'favoriteArtists',
   function (EventsList, mapPosition, favoriteArtists) {
     var recs = new EventsList(
-      '//api.bandsintown.com/events/recommended.json',
+      'https://api.bandsintown.com/events/recommended.json',
       function () {
         var latitude = mapPosition.latitude;
         var longitude = mapPosition.longitude;
@@ -175,7 +175,7 @@ angular.module('concert-search')
 
     vl.fetchEvents = function (venue) {
       var eventsLoaded = $http.jsonp(
-        '//api.bandsintown.com/venues/' + venue.id + '/events.json',
+        'https://api.bandsintown.com/venues/' + venue.id + '/events.json',
         { params: {
             callback: 'JSON_CALLBACK',
             app_id: APPID
