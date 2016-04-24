@@ -1,3 +1,5 @@
+console.error('JAVASCRIPT OUTPUT');
+
 angular.module('concert-search', ['ionic', 'ngSanitize'])
 
 .value('APPID', 'concert-search')
@@ -9,10 +11,40 @@ angular.module('concert-search', ['ionic', 'ngSanitize'])
   delete $httpProvider.defaults.headers.common['X-Requested-With'];
 }])
 
-.run(['$ionicPlatform', function($ionicPlatform) {
-  $ionicPlatform.ready(function() {
-    if(window.StatusBar) {
-      StatusBar.styleDefault();
-    }
-  });
-}]);
+// Mobile app setup
+.run([
+  '$ionicPlatform', '$window', '$document',
+  function($ionicPlatform, $window, $document) {
+    $ionicPlatform.ready(function() {
+      if(window.StatusBar) {
+        StatusBar.styleDefault();
+      }
+
+      // Mock device.platform property if not available
+      if (!$window.device) {
+        window.device = { platform: 'Browser' };
+      }
+      
+      // Handle click events for all external URLs
+      if ($window.device.platform.toUpperCase() === 'ANDROID') {
+        $document.on('click', function (e) {
+          var url = e.target.href;
+          if (!url || url.indexOf('http') !== 0) {
+            return;
+          }
+          navigator.app.loadUrl(url, { openExternal: true });
+          e.preventDefault();
+        });
+      } else if ($window.device.platform.toUpperCase() === 'IOS') {
+        $document.on('click', function (e) {
+          var url = e.target.href;
+          if (!url || url.indexOf('http') !== 0) {
+            return;
+          }
+          window.open(url, '_system');
+          e.preventDefault();
+        });
+      }
+    });
+  }
+]);
