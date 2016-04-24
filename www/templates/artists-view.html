@@ -1,11 +1,16 @@
 <ion-view>
-  <ion-content>
-    <form>
-      <input type="text" ng-model="$ctrl.artistFilter"
-             ng-change="$ctrl.filterArtists()">
-      <button ng-click="$ctrl.filterArtists()">Search</button>
+  <div class="bar bar-header">
+    <form class="searchform">
+      <label for="artistsfilter-input">
+        Filter artists list
+        <input id="artistsfilter-input" type="text"
+               ng-model="$ctrl.artistFilter" ng-change="$ctrl.filterArtists()">
+      </label>
+      <button ng-click="$ctrl.filterArtists()">Apply</button>
     </form>
-    <ion-list>
+  </div>
+  <ion-content>
+    <ion-list class="artistslist">
       <ion-item ng-repeat="artist in $ctrl.artists">
         <artist-view artist="artist" favorite="$ctrl.isFavorite(artist)">
         </artist-view>

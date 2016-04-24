@@ -9788,7 +9788,7 @@ map-view {
   width: 100%;
   height: 100%; }
 
-ion-content.has-tabs {
+[name=events-view] ion-content.has-tabs, [name=venues-view] ion-content.has-tabs {
   bottom: 85px; }
 
 .scroll {
@@ -9862,3 +9862,23 @@ viewstyle-selector {
 
 .summaryview {
   color: #444; }
+
+.artistslist .list {
+  margin-top: 44px; }
+  .artistslist .list :first-child {
+    border-top: none; }
+
+.searchform {
+  margin: 0 auto;
+  color: #444; }
+  .searchform input[type=text] {
+    display: inline-block;
+    margin: 0 1rem;
+    padding: 0 0.25rem;
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd; }
+
+.favoritestar {
+  margin: 0 0.5rem;
+  font-size: 150%;
+  color: #ff499f; }
