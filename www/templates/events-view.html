@@ -27,17 +27,20 @@
     <input type="checkbox" class="hiddeninput show-auxcontrols-input"
            id="events-show-auxcontrols-input">
     <form class="auxcontrols" ng-show="$ctrl.viewStyle.style === 'Map'">
-      <label class="controlsegment" id="radius-input">
+      <label class="controlsegment" for="radius-input-showhide">
         Radius: {{ $ctrl.searchOptions.radius }}
-        <input id="radius-input" type="range" min="1" max="150"
-               ng-model="$ctrl.searchOptions.radius">
+        <input type="checkbox" class="hiddeninput" id="radius-input-showhide">
+        <div class="range-vert">
+          <input id="radius-input" type="range" min="1" max="150"
+                 ng-model="$ctrl.searchOptions.radius">
+        </div>
       </label>
-      <label class="controlsegment" id="filtering-checkbox">
-        Showing:
-        <span ng-if="$ctrl.searchOptions.filtering">
-          favorites &amp; recommended
+      <label class="controlsegment filtercontrol" id="filtering-checkbox">
+        <i class="icon icon-enlarged ion-eye"></i>
+        <span class="vertical-center" ng-if="$ctrl.searchOptions.filtering">
+          recommended for you
         </span>
-        <span ng-if="!$ctrl.searchOptions.filtering">
+        <span class="vertical-center" ng-if="!$ctrl.searchOptions.filtering">
           all artists
         </span>
         <input id="filtering-checkbox" type="checkbox" name="filtering"

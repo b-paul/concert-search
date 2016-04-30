@@ -70,7 +70,8 @@ angular.module('concert-search')
       + '<div class="summaryview">'
         + '<h4 ng-click="$ctrl.toggleFavorite($ctrl.artist)">'
           + '{{ $ctrl.artist.name }}'
-          + '<i class="favoritestar" ng-class="$ctrl.starType($ctrl.artist)">'
+          + '<i class="favoritestar icon-enlarged"'
+             + 'ng-class="$ctrl.starType($ctrl.artist)">'
         + '</h4>'
       + '</div>',
     scope: {

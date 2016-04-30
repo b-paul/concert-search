@@ -1,5 +1,3 @@
-console.error('JAVASCRIPT OUTPUT');
-
 angular.module('concert-search', ['ionic', 'ngSanitize'])
 
 .value('APPID', 'concert-search')

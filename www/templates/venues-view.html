@@ -30,8 +30,8 @@
     <form class="auxcontrols" ng-show="$ctrl.viewStyle.style === 'Map'">
       <label class="controlsegment" id="radius-input">
         Radius: {{ $ctrl.searchOptions.radius }}
-        <input id="radius-input" type="range" min="1" max="150"
-               ng-model="$ctrl.searchOptions.radius">
+        <input id="radius-input" class="range-vert" type="range"
+               ng-model="$ctrl.searchOptions.radius" min="1" max="150">
       </label>
       <div class="controlsegment">
         <button ng-click="$ctrl.refresh()">Refresh</button>

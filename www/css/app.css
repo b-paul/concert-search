@@ -9830,8 +9830,9 @@ map-view {
   .mapcontrols .controlsegment {
     /* as a flex item... */
     flex: 1;
-    min-width: 10rem;
+    min-width: 4rem;
     padding: 0.5rem 1rem;
+    position: relative;
     /* as a flex container... */
     display: flex;
     justify-content: center; }
@@ -9840,6 +9841,27 @@ map-view {
       flex: 1; }
     .mapcontrols .controlsegment button {
       margin: 0 auto; }
+  .mapcontrols .range-vert {
+    background-color: #04af04;
+    padding: 0.5rem 0.75rem 0.3rem;
+    transform: translate3d(-50%, 0, 0) rotate(-90deg);
+    position: absolute;
+    left: 60%;
+    bottom: 6rem;
+    box-shadow: -2px 2px 5px 0 rgba(0, 0, 0, 0.35);
+    border-radius: 5px;
+    display: none; }
+  .mapcontrols #radius-input-showhide:checked ~ .range-vert {
+    display: block; }
+  .mapcontrols .filtercontrol i {
+    flex: 0; }
+  .mapcontrols .filtercontrol span {
+    display: block;
+    height: 100%;
+    /* this lets the vertical centering work */
+    margin-top: 10px;
+    line-height: 120%;
+    transform: translate3d(0, -50%, 0); }
 
 viewstyle-selector {
   text-align: center; }
@@ -9878,7 +9900,10 @@ viewstyle-selector {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd; }
 
-.favoritestar {
+.icon-enlarged {
   margin: 0 0.5rem;
   font-size: 150%;
+  line-height: 15px; }
+
+.favoritestar {
   color: #ff499f; }
