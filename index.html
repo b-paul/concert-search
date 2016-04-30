@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
+    <title></title>
+
+    <link href="css/app.css" rel="stylesheet">
+
+    <!-- IF using Sass (run gulp sass first), then uncomment below and remove the CSS includes above
+    <link href="css/ionic.app.css" rel="stylesheet">
+    -->
+
+    <!-- ionic/angularjs js -->
+    <script src="lib/ionic/js/ionic.bundle.js"></script>
+
+    <!-- google maps api -->
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFHuXvIkgLVtug-DwfJQbhkBh0wv4IEsY&amp;libraries=places"></script>
+
+    <!-- cordova script (this will be a 404 during development) -->
+    <script src="cordova.js"></script>
+
+    <!-- your app's js -->
+    <script src="js/app.js"></script>
+    <script src="js/routes.js"></script>
+    <script src="js/services.js"></script>
+    <script src="js/directives.js"></script>
+    <script src="js/controllers.js"></script>
+  </head>
+
+  <body ng-app="concert-search">
+    <ion-nav-view></ion-nav-view>
+
+    <script id="app-template" type="text/ng-template">
+      
+      <ion-tabs>
+        <ion-tab title="Events" href="#/app/events">
+          <ion-nav-view name="events-view"></ion-nav-view>
+        </ion-tab>
+        <ion-tab title="Venues" href="#/app/venues">
+          <ion-nav-view name="venues-view"></ion-nav-view>
+        </ion-tab>
+        <ion-tab title="Artists" href="#/app/artists"
+                 ng-controller="favoritesCounterCtrl" badge="favCount">
+          <ion-nav-view name="artists-view"></ion-nav-view>
+        </ion-tab>
+      </ion-tabs>
+    
+    </script>
+  </body>
+</html>

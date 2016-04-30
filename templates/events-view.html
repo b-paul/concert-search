@@ -1,0 +1,54 @@
+<ion-view>
+  <div ng-if="$ctrl.viewStyle.style == 'Map'">
+    <ion-content scroll="false">
+      <map-view map-data="$ctrl.events">
+        <event-view event="selectedMapData"></event-view>
+      </map-view>
+    </ion-content>
+  </div>
+  <div ng-if="$ctrl.viewStyle.style == 'List'">
+    <ion-content>
+      <ion-list>
+        <ion-item ng-repeat="event in $ctrl.events">
+          <event-view event="event"></event-view>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </div>
+  <div class="mapcontrols">
+    <div class="maincontrols">
+      <viewstyle-selector id="events-viewstyle" view-style="$ctrl.viewStyle">
+      </viewstyle-selector>
+    </div>
+    <label for="events-show-auxcontrols-input"
+           ng-show="$ctrl.viewStyle.style === 'Map'"    
+           class="icon ion-gear-b show-auxcontrols">
+    </label>
+    <input type="checkbox" class="hiddeninput show-auxcontrols-input"
+           id="events-show-auxcontrols-input">
+    <form class="auxcontrols" ng-show="$ctrl.viewStyle.style === 'Map'">
+      <label class="controlsegment" for="radius-input-showhide">
+        Radius: {{ $ctrl.searchOptions.radius }}
+        <input type="checkbox" class="hiddeninput" id="radius-input-showhide">
+        <div class="range-vert">
+          <input id="radius-input" type="range" min="1" max="150"
+                 ng-model="$ctrl.searchOptions.radius">
+        </div>
+      </label>
+      <label class="controlsegment filtercontrol" id="filtering-checkbox">
+        <i class="icon icon-enlarged ion-eye"></i>
+        <span class="vertical-center" ng-if="$ctrl.searchOptions.filtering">
+          recommended for you
+        </span>
+        <span class="vertical-center" ng-if="!$ctrl.searchOptions.filtering">
+          all artists
+        </span>
+        <input id="filtering-checkbox" type="checkbox" name="filtering"
+               class="hiddeninput" ng-model="$ctrl.searchOptions.filtering">
+      </label>
+      <div class="controlsegment">
+        <button ng-click="$ctrl.refresh()">Refresh</button>
+      </div>
+    </form>
+  </div>
+</ion-view>

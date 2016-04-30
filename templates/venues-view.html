@@ -1,0 +1,41 @@
+<ion-view>
+  <div ng-if="$ctrl.viewStyle.style == 'Map'">
+    <ion-content scroll="false">
+      <map-view map-data="$ctrl.venues">
+        <venue-view dynamic venue="selectedMapData"></venue-view>
+      </map-view>
+    </ion-content>
+  </div>
+  <div ng-if="$ctrl.viewStyle.style == 'List'">
+    <ion-content>
+      <ion-list>
+        <ion-item ng-repeat="venue in $ctrl.venues">
+          <venue-view venue="venue" on-inspect="$ctrl.jumpToMap(venue)">
+          </venue-view>
+        </ion-item>
+      </ion-list>
+    </ion-content>
+  </div>
+  <div class="mapcontrols">
+    <div class="maincontrols">
+      <viewstyle-selector id="venues-viewstyle" view-style="$ctrl.viewStyle">
+      </viewstyle-selector>
+    </div>
+    <label for="venues-show-auxcontrols-input"
+           ng-show="$ctrl.viewStyle.style === 'Map'"    
+           class="icon ion-gear-b show-auxcontrols">
+    </label>
+    <input type="checkbox" class="hiddeninput show-auxcontrols-input"
+           id="venues-show-auxcontrols-input">
+    <form class="auxcontrols" ng-show="$ctrl.viewStyle.style === 'Map'">
+      <label class="controlsegment" id="radius-input">
+        Radius: {{ $ctrl.searchOptions.radius }}
+        <input id="radius-input" class="range-vert" type="range"
+               ng-model="$ctrl.searchOptions.radius" min="1" max="150">
+      </label>
+      <div class="controlsegment">
+        <button ng-click="$ctrl.refresh()">Refresh</button>
+      </div>
+    </form>
+  </div>
+</ion-view>
